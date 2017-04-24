@@ -1,2 +1,2 @@
 # idp-proxy
-This is IdP proxy to the saml federation.
+This is proxy of the outside saml IdP or DS.
