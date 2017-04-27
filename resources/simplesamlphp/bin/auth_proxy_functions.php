@@ -2,7 +2,8 @@
 // Common Constants
 const ENTITY_DESCRIPTOR = "md:EntityDescriptor";
 const ENTITY_ID = "entityID";
-const METADATA_PATH = '/var/www/simplesamlphp/metadata/xml/auth-proxies.xml';
+const METADATA_PATH = 'metadata/xml/auth-proxies.xml';
+const CONFIG_PATH = 'config/config.php';
 const EXIT_OK = 0;
 const EXIT_ERROR = 1;
 const EXIT_ALREADY_EXIST_ENTITY_ID = 1;

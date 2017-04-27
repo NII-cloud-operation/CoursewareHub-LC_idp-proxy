@@ -9,19 +9,23 @@ $metadataFilePath = $baseDir.DIRECTORY_SEPARATOR.METADATA_PATH;
 $addMetadataPath = tempnam("/tmp", "xml");
 
 $exit_code = EXIT_OK;
+if (file_exists($metadataFilePath)) {
+   exit($exit_code);
+}
+
 try {
     system("curl --insecure -o $addMetadataPath $metadataUrl");
 
     $md = new DOMDocument();
     $md->load($metadataFilePath);
 
-    $existNode = getEntityDescriptorNode($md->firstChild->childNodes, $entityID);
+    $existNode = getEntityDescriptorNode($md->childNodes, $entityID);
     if (is_null($existNode)) {
         $addMd = new DOMDocument();
         $addMd->load($addMetadataPath);
         $addNode = getEntityDescriptorNode($addMd->childNodes, $entityID);
-        $md->documentElement->appendChild($md->importNode($addNode, true));
-        $md->documentElement->appendChild($md->createTextNode("\n"));
+        $md->firstChild->appendChild($md->importNode($addNode, true));
+        $md->firstChild->appendChild($md->createTextNode("\n"));
         $md->save($metadataFilePath);
     } else {
         $exit_code = EXIT_ALREADY_EXIST_ENTITY_ID;

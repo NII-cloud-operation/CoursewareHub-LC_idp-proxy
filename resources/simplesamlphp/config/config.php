@@ -669,8 +669,8 @@ $config = array(
      */
     'metadata.sources' => array(
         array('type' => 'flatfile'),
-        array('type' => 'xml', 'file' => 'metadata/xml/gakunin-test-metadata.xml'),
-        array('type' => 'xml', 'file' => 'metadata/xml/auth-proxies.xml'),
+        #DS_METADATA_XML#,
+        array('type' => 'xml', 'file' => 'metadata/xml/auth-proxies.xml')
     ),
 
 
