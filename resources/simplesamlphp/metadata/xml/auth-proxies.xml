@@ -1,4 +1,3 @@
 <?xml version="1.0"?>
-<EntitiesDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:ds="http://www.w3.org/2000/09/x
-mldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Name="auth-proxies">
+<EntitiesDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Name="auth-proxies">
 </EntitiesDescriptor>
