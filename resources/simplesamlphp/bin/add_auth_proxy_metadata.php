@@ -4,18 +4,17 @@ $baseDir = dirname(dirname(__FILE__));
 require_once $baseDir.DIRECTORY_SEPARATOR.'bin'.DIRECTORY_SEPARATOR.'auth_proxy_functions.php';
 
 $entityID = $argv[1];
-$metadataUrl = $argv[2];
+$addMetadataPath = $argv[2];
 $metadataFilePath = $baseDir.DIRECTORY_SEPARATOR.METADATA_PATH;
-$addMetadataPath = tempnam("/tmp", "xml");
 
 $exit_code = EXIT_OK;
-if (file_exists($metadataFilePath)) {
+if (!file_exists($metadataFilePath)) {
+   echo "Error: File not found ($metadataFilePath)\n";
+   $exit_code = EXIT_ERROR;
    exit($exit_code);
 }
 
 try {
-    system("curl --insecure -o $addMetadataPath $metadataUrl");
-
     $md = new DOMDocument();
     $md->load($metadataFilePath);
 
