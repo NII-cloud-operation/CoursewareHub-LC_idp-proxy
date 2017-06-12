@@ -21,6 +21,7 @@ try {
 }
 
 $md = null;
+system("sed -i '/^$/d' $metadataFilePath");
 
 exit($exit_code);
 ?>
