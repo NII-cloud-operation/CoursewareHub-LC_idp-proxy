@@ -17,12 +17,12 @@ RUN set -x \
     && rm /tmp/remi-release-7.rpm \
     #&& yum -y install http://rpms.famillecollet.com/enterprise/remi-release-7.rpm \
     && rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-remi \
-    && yum -y install --enablerepo=remi-php56 composer \
-    && yum -y install --enablerepo=remi-php56 php php-fpm php-xml php-mcrypt php-gmp php-soap \
+    && yum -y install --enablerepo=remi-php71 composer \
+    && yum -y install --enablerepo=remi-php71 php php-fpm php-xml php-mcrypt php-gmp php-soap \
     && systemctl enable php-fpm \
     # Install simplesamlphp
     && cd /var/www \
-    && curl -Lo downloaded-simplesamlphp.tar.gz https://github.com/simplesamlphp/simplesamlphp/releases/download/v1.14.12/simplesamlphp-1.14.12.tar.gz \
+    && curl -Lo downloaded-simplesamlphp.tar.gz https://github.com/simplesamlphp/simplesamlphp/releases/download/v1.14.14/simplesamlphp-1.14.14.tar.gz \
     && tar xvfz downloaded-simplesamlphp.tar.gz \
     && mv $( ls | grep simplesaml | grep -v *tar.gz ) simplesamlphp \
     && rm /var/www/downloaded-simplesamlphp.tar.gz 
@@ -43,6 +43,10 @@ COPY resources/keys/idp-proxy.key /etc/pki/nginx/private/
 # Setup php-fpm
 COPY resources/php-fpm/www.conf /etc/php-fpm.d/
 RUN chgrp nginx /var/lib/php/session
+
+# Apply the simplesamlphp patch
+ARG SOAP_CLIENT_PHP="simplesamlphp/vendor/simplesamlphp/saml2/src/SAML2/SOAPClient.php"
+COPY resources/${SOAP_CLIENT_PHP} /var/www/${SOAP_CLIENT_PHP}
 
 # Setup simplesamlphp
 RUN set -x \
