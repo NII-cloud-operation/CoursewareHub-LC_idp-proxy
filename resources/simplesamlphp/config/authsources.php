@@ -27,7 +27,7 @@ $config = array(
 
         // The URL to the discovery service.
         // Can be NULL/unset, in which case a builtin discovery service will be used.
-        'discoURL' => 'https://ds.gakunin.nii.ac.jp/WAYF',
+        //'discoURL' => 'https://ds.gakunin.nii.ac.jp/WAYF',
 
         /*
          * WARNING: SHA-1 is disallowed starting January the 1st, 2014.
