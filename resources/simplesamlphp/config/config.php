@@ -574,7 +574,7 @@ $config = array(
 
         59 => array(
             'class' => 'attributeaggregator:attributeaggregator',
-            'entityId' => 'https://cg.gakunin.jp/shibboleth-sp',
+            'entityId' => 'https://cg.gakunin.jp/idp/shibboleth',
 
             /**
              * The subject of the attribute query. Default: urn:oid:1.3.6.1.4.1.5923.1.1.1.6 (eduPersonPrincipalName)
@@ -718,6 +718,7 @@ $config = array(
         array('type' => 'flatfile'),
         #DS_METADATA_XML#,
         #CG_METADATA_XML#,
+        #OI_METADATA_XML#,
         array('type' => 'xml', 'file' => 'metadata/xml/auth-proxies.xml')
     ),
 
