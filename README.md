@@ -37,6 +37,7 @@ $ ./bin/idpproxyctl run
 ```
 
 ## Add Courseware SP to IdP-Proxy
+You need to add the Courseware to IdP-Proxy to use the authentication of Gakunin federation.
 Add the metadata of Courseware SP into IdP-Proxy.
 ```
 $ cd GIT_CLONE_DIR/idp-proxy
