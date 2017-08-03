@@ -9,10 +9,10 @@
    * idp-proxy.cer
      + Server certificte of IdP-Proxy issued by NII.
    * idp-proxy.chained.cer
-     + Authenticated server certificate of IdP-Proxy (Intermediate certificate + Server certificate).
+     + Authenticated server certificate of IdP-Proxy (Intermediate certificate + Server certificate).
    * idp-proxy.key
-     + Private key of IdP-Proxy.
-2. Place 'idp-proxy.cer', 'idp-proxy.chained.cer', 'idp-proxy.ey' in arbitrary directory.
+     + Private key of IdP-Proxy.
+2. Place 'idp-proxy.cer', 'idp-proxy.chained.cer', 'idp-proxy.ey' in arbitrary directory.
 
 ## Clone the repository of IdP-Proxy
 Make the clone of the repository of IdP-Proxy on GitHub.
@@ -27,7 +27,7 @@ Build IdP-Proxy container image as 'idp-proxy:latest'.
 $ cd GIT_CLONE_DIR/idp-proxy
 $ ./build-idp-proxy CERT_DIR
 ```
-* Specify the path of the directory where the server certifcates and the private key are placed by 'CERT_DIR'. 
+* Specify the path of the directory where the server certifcates and the private key are placed by 'CERT_DIR'. 
 
 ## Run IdP-Proxy
 Run IdP-Proxy container using 'idp-proxy:latest' image.
