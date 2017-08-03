@@ -1,0 +1,126 @@
+#/bin/bash
+
+IDP_PROXY=idp-proxy
+IDP_PROXY_IMAGE="idp-proxy:latest"
+
+usage()
+{
+    cat <<EOF
+Usage:
+
+## Run new idp-proxy.
+idpproxyctl run
+
+## Start idp-prox which stopped.
+idpproxyctl start
+
+## Stop idp-proxy.
+idpproxyctl stop
+
+## Restart idp-proxy.
+idpproxyctl restart
+
+## Add metadata of Courseware SP.
+idpproxyctl add-courseware SP_HOST
+  SP_HOST: hostname or FQDN of SP host.
+
+## Remove metadata of Courseware SP.
+idpproxyctl del-courseware SP_HOST
+  SP_HOST: hostname or FQDN of SP host.
+
+EOF
+}
+
+reportfailed()
+{
+    echo "Script failed...exiting. ($*)" 1>&2
+    usage
+    exit 255
+}
+
+function run_idp_proxy()
+{
+    echo "Run idp-proxy ..."
+    sudo docker run -v /var/log --privileged --name $IDP_PROXY -p 443:443 -d $IDP_PROXY_IMAGE /sbin/init
+
+    echo "Download Gakunin DS metadata ..."
+    sudo docker exec -i $IDP_PROXY bash << EOF
+/var/www/simplesamlphp/bin/update_ds_metadata.sh
+EOF
+    echo "Done."
+}
+
+function start_idp_proxy()
+{
+    sudo docker start $IDP_PROXY
+}
+
+function stop_idp_proxy()
+{
+    sudo docker stop $IDP_PROXY
+}
+
+function restart_idp_proxy()
+{
+    sudo docker restart $IDP_PROXY
+}
+
+function add_auth_proxy()
+{
+    local auth_proxy_host="$1"
+
+    # check parameters
+    if [ -z "$auth_proxy_host" ] ; then
+        reportfailed "too few arguments."
+    fi
+    entity_id="https://$auth_proxy_host/simplesaml/module.php"
+    metadata_url="https://$auth_proxy_host/simplesaml/module.php/saml/sp/metadata.php/default-sp"
+    tempfile=`mktemp /tmp/xml_XXXXXX`
+    curl --insecure -o $tempfile $metadata_url
+    chmod 666 $tempfile
+    sudo docker cp $tempfile $IDP_PROXY:/root
+    copyto='/root/'$(basename $tempfile)
+    sudo docker exec -i $IDP_PROXY bash << EOF
+/var/www/simplesamlphp/bin/add_auth_proxy_metadata.php $entity_id $copyto
+EOF
+    rm -f $tempfile
+}
+
+function delete_auth_proxy()
+{
+    local auth_proxy_host="$1"
+
+    # check parameters
+    if [ -z "$auth_proxy_host" ] ; then
+        reportfailed "missing arguments."
+    fi
+
+    entity_id="https://$auth_proxy_host/simplesaml/module.php"
+    sudo docker exec -i $IDP_PROXY bash << EOF
+/var/www/simplesamlphp/bin/remove_auth_proxy_metadata.php $entity_id 
+EOF
+}
+
+
+
+#----- main -----
+cmd="$1"
+shift
+
+case "$cmd" in
+    run) run_idp_proxy "$@"
+        ;;
+    start) start_idp_proxy "$@"
+        ;;
+    stop) stop_idp_proxy "$@"   
+        ;;
+    restart) restart_idp_proxy "$@"
+        ;;
+    add-courseware) add_auth_proxy "$@"
+        ;;
+    del-courseware) delete_auth_proxy "$@"
+        ;;
+    *) usage
+        ;;
+esac
+
