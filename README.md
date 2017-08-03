@@ -2,6 +2,7 @@
 
 ## Prerequisite
 * Docker version 1.12.5 later
+* Be abailable 'sudo'   
 
 ## Prepare Server certificate and key
 1. Prepare the Server certificate of IdP-Proxy as follow names.
