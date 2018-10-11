@@ -5,12 +5,9 @@ OPT=$2
 
 BASE_DIR=$(cd $(dirname $0); pwd)
 
-mkdir -p $BASE_DIR/resources/tmp
-(cd $BASE_DIR/resources/tmp; curl -O http://rpms.famillecollet.com/enterprise/remi-release-7.rpm)
 mkdir -p $BASE_DIR/resources/keys
 cp -p $CERT_DIR/idp-proxy.chained.cer $BASE_DIR/resources/keys/idp-proxy.chained.cer
 cp -p $CERT_DIR/idp-proxy.cer $BASE_DIR/resources/keys/idp-proxy.cer
 cp -p $CERT_DIR/idp-proxy.key $BASE_DIR/resources/keys/idp-proxy.key
 
 sudo docker build $OPT -t idp-proxy:latest ./
-
