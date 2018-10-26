@@ -60,7 +60,7 @@ COPY resources/simplesamlphp/metadata/xml/auth-proxies.xml /var/www/simplesamlph
 COPY resources/simplesamlphp/templates/selectidp-dropdown.php /var/www/simplesamlphp/templates/selectidp-dropdown.php
 COPY resources/saml/www/sp/discoresp.php /var/www/simplesamlphp/modules/saml/www/sp/discoresp.php
 COPY bin/start.sh /start.sh
-RUN chmod +x /start.sh
+RUN chmod +x /start.sh /var/www/simplesamlphp/bin/update_ds_metadata.sh
 
 # Set cron for Gakunin metadata updating
 RUN set -x \
