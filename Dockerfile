@@ -61,8 +61,10 @@ COPY resources/simplesamlphp/metadata/saml20-idp-hosted.php /var/www/simplesamlp
 COPY resources/simplesamlphp/metadata/xml/auth-proxies.xml /var/www/simplesamlphp/metadata/xml
 COPY resources/simplesamlphp/templates/selectidp-dropdown.php /var/www/simplesamlphp/templates/selectidp-dropdown.php
 COPY resources/saml/www/sp/discoresp.php /var/www/simplesamlphp/modules/saml/www/sp/discoresp.php
+COPY resources/simplesamlphp/bin/add_auth_proxy.sh /usr/local/sbin/
 COPY bin/start.sh /start.sh
-RUN chmod +x /start.sh /var/www/simplesamlphp/bin/update_ds_metadata.sh
+RUN chmod +x /start.sh /var/www/simplesamlphp/bin/update_ds_metadata.sh \
+             /usr/local/sbin/add_auth_proxy.sh
 
 # Set cron for Gakunin metadata updating
 RUN set -x \
