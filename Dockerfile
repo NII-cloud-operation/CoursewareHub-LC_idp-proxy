@@ -7,7 +7,7 @@ RUN set -x \
     && yum -y update \
     && yum -y install epel-release \
     && rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7 \
-    && yum -y install less which cronie logrotate \
+    && yum -y install less which cronie logrotate supervisor \
     && systemctl enable crond \
     && yum -y install yum-utils \
     # Install nginx and php
