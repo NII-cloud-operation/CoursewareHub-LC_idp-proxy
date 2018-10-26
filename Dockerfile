@@ -36,6 +36,7 @@ RUN set -x \
 # Copy the nginx configuration files
 COPY resources/nginx/nginx.conf /etc/nginx/
 COPY resources/nginx/idp-proxy.conf /etc/nginx/conf.d/
+RUN mkdir -p /etc/pki/nginx/private/
 
 # Setup php-fpm
 COPY resources/php-fpm/www.conf /etc/php-fpm.d/
