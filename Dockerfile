@@ -40,7 +40,8 @@ RUN mkdir -p /etc/pki/nginx/private/
 
 # Setup php-fpm
 COPY resources/php-fpm/www.conf /etc/php-fpm.d/
-RUN chgrp nginx /var/lib/php/session
+RUN chgrp nginx /var/lib/php/session \
+    && mkdir -p /run/php-fpm
 
 # Apply the simplesamlphp patch
 ARG SOAP_CLIENT_PHP="simplesamlphp/vendor/simplesamlphp/saml2/src/SAML2/SOAPClient.php"
