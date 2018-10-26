@@ -281,7 +281,8 @@ var wayf_additional_idps = [
 </script>
 
 <script type="text/javascript" charset="UTF-8"><!--
-    document.write('<script type="text/javascript" src="https://ds.gakunin.nii.ac.jp/WAYF/embedded-wayf.js?' + (new Date().getTime()) + '"></scr'+'ipt>');
+var embedded_wayf_URL = "https://ds.gakunin.nii.ac.jp/WAYF/embedded-wayf.js";
+document.write('<script type="text/javascript" src="' + embedded_wayf_URL + '?' + (new Date().getTime()) + '"></scr'+'ipt>');
 //-->
 </script>
 
