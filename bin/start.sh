@@ -13,4 +13,4 @@ cp -p $CERT_DIR/idp-proxy.key /var/www/simplesamlphp/cert/
 # Update DS metadata
 /var/www/simplesamlphp/bin/update_ds_metadata.sh
 
-/sbin/init
+/usr/bin/supervisord -n -c /etc/supervisord.conf

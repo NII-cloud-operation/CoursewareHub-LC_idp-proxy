@@ -70,4 +70,7 @@ RUN set -x \
 VOLUME /etc/cert
 ENV CERT_DIR=/etc/cert
 
+# supervisord
+COPY resources/supervisord.conf /etc/
+
 CMD /start.sh
