@@ -7,7 +7,7 @@ RUN set -x \
     && yum -y update \
     && yum -y install epel-release \
     && rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7 \
-    && yum -y install less which cronie logrotate \
+    && yum -y install less which cronie logrotate supervisor \
     && systemctl enable crond \
     && yum -y install yum-utils \
     # Install nginx and php
@@ -36,10 +36,12 @@ RUN set -x \
 # Copy the nginx configuration files
 COPY resources/nginx/nginx.conf /etc/nginx/
 COPY resources/nginx/idp-proxy.conf /etc/nginx/conf.d/
+RUN mkdir -p /etc/pki/nginx/private/
 
 # Setup php-fpm
 COPY resources/php-fpm/www.conf /etc/php-fpm.d/
-RUN chgrp nginx /var/lib/php/session
+RUN chgrp nginx /var/lib/php/session \
+    && mkdir -p /run/php-fpm
 
 # Apply the simplesamlphp patch
 ARG SOAP_CLIENT_PHP="simplesamlphp/vendor/simplesamlphp/saml2/src/SAML2/SOAPClient.php"
@@ -57,8 +59,12 @@ COPY resources/simplesamlphp/bin/remove_auth_proxy_metadata.php /var/www/simples
 COPY resources/simplesamlphp/bin/auth_proxy_functions.php /var/www/simplesamlphp/bin
 COPY resources/simplesamlphp/metadata/saml20-idp-hosted.php /var/www/simplesamlphp/metadata
 COPY resources/simplesamlphp/metadata/xml/auth-proxies.xml /var/www/simplesamlphp/metadata/xml
+COPY resources/simplesamlphp/templates/selectidp-dropdown.php /var/www/simplesamlphp/templates/selectidp-dropdown.php
+COPY resources/saml/www/sp/discoresp.php /var/www/simplesamlphp/modules/saml/www/sp/discoresp.php
+COPY resources/simplesamlphp/bin/add_auth_proxy.sh /usr/local/sbin/
 COPY bin/start.sh /start.sh
-RUN chmod +x /start.sh
+RUN chmod +x /start.sh /var/www/simplesamlphp/bin/update_ds_metadata.sh \
+             /usr/local/sbin/add_auth_proxy.sh
 
 # Set cron for Gakunin metadata updating
 RUN set -x \
@@ -66,5 +72,8 @@ RUN set -x \
 
 VOLUME /etc/cert
 ENV CERT_DIR=/etc/cert
+
+# supervisord
+COPY resources/supervisord.conf /etc/
 
 CMD /start.sh

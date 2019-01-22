@@ -10,4 +10,7 @@ cp -p $CERT_DIR/idp-proxy.key /etc/pki/nginx/private/
 cp -p $CERT_DIR/idp-proxy.cer /var/www/simplesamlphp/cert/
 cp -p $CERT_DIR/idp-proxy.key /var/www/simplesamlphp/cert/
 
-/sbin/init
+# Update DS metadata
+/var/www/simplesamlphp/bin/update_ds_metadata.sh
+
+/usr/bin/supervisord -n -c /etc/supervisord.conf
