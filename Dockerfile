@@ -50,10 +50,16 @@ COPY resources/${SOAP_CLIENT_PHP} /var/www/${SOAP_CLIENT_PHP}
 # Setup simplesamlphp
 RUN set -x \
     && mkdir -p /var/www/simplesamlphp/metadata/xml \
+    && touch /var/www/simplesamlphp/modules/cron/enable \
+    && touch /var/www/simplesamlphp/modules/metarefresh/enable \
+    && cp /var/www/simplesamlphp/modules/cron/config-templates/*.php /var/www/simplesamlphp/config/ \
+    && mkdir -p /var/www/simplesamlphp/metadata/gakunin-metadata \
+                /var/www/simplesamlphp/metadata/attributeauthority-remote \
+                /var/www/simplesamlphp/metadata/open-idp-metadata \
     && chown -R nginx:nginx /var/www/simplesamlphp
 COPY resources/simplesamlphp/config/config.php /var/www/simplesamlphp/config
 COPY resources/simplesamlphp/config/authsources.php /var/www/simplesamlphp/config
-COPY resources/simplesamlphp/bin/update_ds_metadata.sh /var/www/simplesamlphp/bin
+COPY resources/simplesamlphp/config/config-metarefresh.php /var/www/simplesamlphp/config
 COPY resources/simplesamlphp/bin/add_auth_proxy_metadata.php /var/www/simplesamlphp/bin
 COPY resources/simplesamlphp/bin/remove_auth_proxy_metadata.php /var/www/simplesamlphp/bin
 COPY resources/simplesamlphp/bin/auth_proxy_functions.php /var/www/simplesamlphp/bin
@@ -63,12 +69,8 @@ COPY resources/simplesamlphp/templates/selectidp-dropdown.php /var/www/simplesam
 COPY resources/saml/www/sp/discoresp.php /var/www/simplesamlphp/modules/saml/www/sp/discoresp.php
 COPY resources/simplesamlphp/bin/add_auth_proxy.sh /usr/local/sbin/
 COPY bin/start.sh /start.sh
-RUN chmod +x /start.sh /var/www/simplesamlphp/bin/update_ds_metadata.sh \
+RUN chmod +x /start.sh \
              /usr/local/sbin/add_auth_proxy.sh
-
-# Set cron for Gakunin metadata updating
-RUN set -x \
-    && echo "0 0 */10 * * /var/www/simplesamlphp/bin/update_ds_metadata.sh" > /var/spool/cron/root
 
 VOLUME /etc/cert
 ENV CERT_DIR=/etc/cert
