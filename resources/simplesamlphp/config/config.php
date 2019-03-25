@@ -716,9 +716,9 @@ $config = array(
      */
     'metadata.sources' => array(
         array('type' => 'flatfile'),
-        #DS_METADATA_XML#,
-        #CG_METADATA_XML#,
-        #OI_METADATA_XML#,
+        array('type' => 'flatfile', 'directory' => 'metadata/gakunin-metadata'),
+        array('type' => 'flatfile', 'directory' => 'metadata/attributeauthority-remote'),
+        array('type' => 'flatfile', 'directory' => 'metadata/open-idp-metadata'),
         array('type' => 'xml', 'file' => 'metadata/xml/auth-proxies.xml')
     ),
 
@@ -850,7 +850,7 @@ $config = array(
      * Metadata signing can also be enabled for a individual SP or IdP by setting the
      * same option in the metadata for the SP or IdP.
      */
-    'metadata.sign.enable' => false,
+    'metadata.sign.enable' => true,
 
     /*
      * The default key & certificate which should be used to sign generated metadata. These
