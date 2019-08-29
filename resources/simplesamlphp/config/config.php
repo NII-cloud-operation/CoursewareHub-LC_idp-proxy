@@ -589,7 +589,54 @@ $config = array(
             /**
              * The format of attributeId. Default is 'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent'
              */
-            'nameIdFormat' => 'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent',
+            'nameIdFormat' => 'urn:oid:1.3.6.1.4.1.5923.1.1.1.6',
+
+
+            /**
+             * The name Format of the attribute names.
+             */
+            'attributeNameFormat' => 'urn:oasis:names:tc:SAML:2.0:attrname-format:uri',
+
+            /**
+             * The requested attributes. If not present, we will get all
+             * the attributes. The keys of the array is the attribute name in (''urn:oid'') format.
+             * values:
+             *   the array of acceptable values. If not defined, the filter will accept all values.
+             * multiSource:
+             *   merge:    merge the existing and the new values, this is the default behaviour,
+             *   override: drop the existing values and set the values from AA,
+             *   keep:     drop the new values from AA and keep the original values.
+             */
+            'attributes' => array(
+                    "urn:oid:1.3.6.1.4.1.5923.1.5.1.1" => array (),
+            //         "urn:oid:attribute-OID-2" => array (
+            //               "multiSource" => "keep"
+            //               ),
+            //         "urn:oid:attribute-OID-3" => array (
+            //               "values" => array ("value1", "value2"),
+            //               ),
+            //         "urn:oid:attribute-OID-4" => array ()
+                   ),
+         ),
+
+        69 => array(
+            'class' => 'attributeaggregator:attributeaggregator',
+            'entityId' => 'https://cg.gakunin.jp/idp/shibboleth',
+
+            /**
+             * The subject of the attribute query. Default: urn:oid:1.3.6.1.4.1.5923.1.1.1.6 (eduPersonPrincipalName)
+             */
+            'attributeId' => 'urn:oid:0.9.2342.19200300.100.1.3',
+
+            /**
+             * If set to TRUE, the module will throw an exception if attributeId is not found.
+             */
+            'required' => FALSE,
+
+            /**
+             * The format of attributeId. Default is 'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent'
+             */
+            'nameIdFormat' => 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress',
 
 
             /**

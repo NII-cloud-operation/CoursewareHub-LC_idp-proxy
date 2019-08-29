@@ -43,9 +43,14 @@ COPY resources/php-fpm/www.conf /etc/php-fpm.d/
 RUN chgrp nginx /var/lib/php/session \
     && mkdir -p /run/php-fpm
 
-# Apply the simplesamlphp patch
+# Apply the saml2 patch
 ARG SOAP_CLIENT_PHP="simplesamlphp/vendor/simplesamlphp/saml2/src/SAML2/SOAPClient.php"
 COPY resources/${SOAP_CLIENT_PHP} /var/www/${SOAP_CLIENT_PHP}
+# Apply the simplesamlphp-module-attributeaggregator patch
+COPY resources/simplesamlphp/attributeaggregator-gakunin-cgw.patch /var/www/simplesamlphp/modules/attributeaggregator/
+RUN yum -y update && yum -y install patch && \
+    cd /var/www/simplesamlphp/modules/attributeaggregator/ && cat attributeaggregator-gakunin-cgw.patch | patch -p1 && \
+    rm attributeaggregator-gakunin-cgw.patch
 
 # Setup simplesamlphp
 RUN set -x \
