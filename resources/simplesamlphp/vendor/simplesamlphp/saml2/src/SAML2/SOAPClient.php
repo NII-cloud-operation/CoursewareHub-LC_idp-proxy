@@ -104,9 +104,6 @@ class SAML2_SOAPClient
         $x = new SoapClient(NULL, $options);
 
         // Add soap-envelopes
-        $nameId = $msg->getNameId();
-        $nameId['Format'] = 'urn:oid:1.3.6.1.4.1.5923.1.1.1.6';
-        $msg->setNameId($nameId);
         $request = $msg->toSignedXML();
         $request = self::START_SOAP_ENVELOPE . $request->ownerDocument->saveXML($request) . self::END_SOAP_ENVELOPE;
 
