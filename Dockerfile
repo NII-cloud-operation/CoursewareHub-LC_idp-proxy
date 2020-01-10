@@ -1,5 +1,7 @@
 FROM docker.io/centos:7
 
+ARG SIMPLESAMLPHP_VERSION="1.18.3"
+
 # Install packages
 ADD http://rpms.famillecollet.com/enterprise/remi-release-7.rpm /tmp/
 RUN set -x \
@@ -18,11 +20,11 @@ RUN set -x \
     #&& yum -y install http://rpms.famillecollet.com/enterprise/remi-release-7.rpm \
     && rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-remi \
     && yum -y install --enablerepo=remi-php71 composer \
-    && yum -y install --enablerepo=remi-php71 php php-fpm php-xml php-mcrypt php-gmp php-soap \
+    && yum -y install --enablerepo=remi-php71 php php-fpm php-xml php-mcrypt php-gmp php-soap php-ldap \
     && systemctl enable php-fpm \
     # Install simplesamlphp
     && cd /var/www \
-    && curl -Lo downloaded-simplesamlphp.tar.gz https://github.com/simplesamlphp/simplesamlphp/releases/download/v1.14.14/simplesamlphp-1.14.14.tar.gz \
+    && curl -Lo downloaded-simplesamlphp.tar.gz https://github.com/simplesamlphp/simplesamlphp/releases/download/v${SIMPLESAMLPHP_VERSION}/simplesamlphp-${SIMPLESAMLPHP_VERSION}.tar.gz \
     && tar xvfz downloaded-simplesamlphp.tar.gz \
     && mv $( ls | grep simplesaml | grep -v *tar.gz ) simplesamlphp \
     && rm /var/www/downloaded-simplesamlphp.tar.gz
@@ -30,7 +32,8 @@ RUN set -x \
 RUN set -x \
     # Install simplesamlphp-module-attributeaggregator
     && cd /var/www/simplesamlphp \
-    && composer require niif/simplesamlphp-module-attributeaggregator:1.*
+    && composer config repositories.attributeaggregator vcs https://github.com/NII-cloud-operation/simplesamlphp-module-attributeaggregator \
+    && composer require niif/simplesamlphp-module-attributeaggregator:dev-2.x-gakunin-cloud-gateway
 
 # Setup nginx
 # Copy the nginx configuration files
@@ -43,19 +46,11 @@ COPY resources/php-fpm/www.conf /etc/php-fpm.d/
 RUN chgrp nginx /var/lib/php/session \
     && mkdir -p /run/php-fpm
 
-# Apply the saml2 patch
-ARG SOAP_CLIENT_PHP="simplesamlphp/vendor/simplesamlphp/saml2/src/SAML2/SOAPClient.php"
-COPY resources/${SOAP_CLIENT_PHP} /var/www/${SOAP_CLIENT_PHP}
-# Apply the simplesamlphp-module-attributeaggregator patch
-COPY resources/simplesamlphp/attributeaggregator-gakunin-cgw.patch /var/www/simplesamlphp/modules/attributeaggregator/
-RUN yum -y update && yum -y install patch && \
-    cd /var/www/simplesamlphp/modules/attributeaggregator/ && cat attributeaggregator-gakunin-cgw.patch | patch -p1 && \
-    rm attributeaggregator-gakunin-cgw.patch
-
 # Setup simplesamlphp
 RUN set -x \
     && mkdir -p /var/www/simplesamlphp/metadata/xml \
     && touch /var/www/simplesamlphp/modules/cron/enable \
+    && touch /var/www/simplesamlphp/modules/statistics/disable \
     && touch /var/www/simplesamlphp/modules/metarefresh/enable \
     && cp /var/www/simplesamlphp/modules/cron/config-templates/*.php /var/www/simplesamlphp/config/ \
     && mkdir -p /var/www/simplesamlphp/metadata/gakunin-metadata \

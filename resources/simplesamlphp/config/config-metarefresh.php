@@ -10,7 +10,8 @@ $config = array(
                     'certificates' => array(
                         'gakunin-signer.cer'
                     ),
-                    'validateFingerprint' => '08:A0:D0:B1:A5:52:A4:E6:6F:39:76:BC:E6:69:83:E3:84:E0:02:13',
+                    'validateFingerprint' => '5E:D6:A8:C5:E9:30:49:3F:B4:BA:77:54:6A:FB:66:BA:14:7D:CB:50:5B:EF:0F:D9:7C:26:04:C2:D9:36:FD:81',
+                    'validateFingerprintAlgorithm' => 'XMLSecurityDSig::SHA256'
                 )
             ),
             'outputDir' => 'metadata/gakunin-metadata/',
@@ -21,7 +22,7 @@ $config = array(
             'cron' => array('daily'),
             'sources' => array(
                 array(
-                    'src' => 'https://meatwiki.nii.ac.jp/confluence/download/attachments/6684843/cgidp-metadata.xml?version=2&modificationDate=1488866091000&api=v2',
+                    'src' => 'https://meatwiki.nii.ac.jp/confluence/download/attachments/6684843/cgidp-metadata.xml?version=3&modificationDate=1543890699000&api=v2'
                 )
             ),
             'outputDir' => 'metadata/attributeauthority-remote/',
