@@ -47,6 +47,7 @@ RUN chgrp nginx /var/lib/php/session \
     && mkdir -p /run/php-fpm
 
 # Setup simplesamlphp
+ARG SIMPLESAMLPHP_METAREFRESH_CONFIG="config-metarefresh.php"
 RUN set -x \
     && mkdir -p /var/www/simplesamlphp/metadata/xml \
     && touch /var/www/simplesamlphp/modules/cron/enable \
@@ -59,7 +60,7 @@ RUN set -x \
     && chown -R nginx:nginx /var/www/simplesamlphp
 COPY resources/simplesamlphp/config/config.php /var/www/simplesamlphp/config
 COPY resources/simplesamlphp/config/authsources.php /var/www/simplesamlphp/config
-COPY resources/simplesamlphp/config/config-metarefresh.php /var/www/simplesamlphp/config
+COPY resources/simplesamlphp/config/${SIMPLESAMLPHP_METAREFRESH_CONFIG} /var/www/simplesamlphp/config/config-metarefresh.php
 COPY resources/simplesamlphp/bin/add_auth_proxy_metadata.php /var/www/simplesamlphp/bin
 COPY resources/simplesamlphp/bin/remove_auth_proxy_metadata.php /var/www/simplesamlphp/bin
 COPY resources/simplesamlphp/bin/auth_proxy_functions.php /var/www/simplesamlphp/bin
@@ -71,6 +72,21 @@ COPY resources/simplesamlphp/bin/add_auth_proxy.sh /usr/local/sbin/
 COPY bin/start.sh /start.sh
 RUN chmod +x /start.sh \
              /usr/local/sbin/add_auth_proxy.sh
+
+# Setup simplesamlphp config
+ARG AUTH_FQDN="nbhub.ecloud.nii.ac.jp"
+ARG DS_FQDN="ds.gakunin.nii.ac.jp"
+ARG CG_FQDN="cg.gakunin.jp"
+RUN sed -i "s;'entityID' => .*;'entityID' => 'https://${AUTH_FQDN}/shibboleth-sp',;" \
+    /var/www/simplesamlphp/config/authsources.php
+RUN sed -i "s;'entityId' => .*;'entityId' => 'https://${CG_FQDN}/idp/shibboleth',;" \
+    /var/www/simplesamlphp/config/config.php
+RUN sed -i "s,var embedded_wayf_URL = .*,var embedded_wayf_URL = \"https://${DS_FQDN}/WAYF/embedded-wayf.js\";," \
+    /var/www/simplesamlphp/templates/selectidp-dropdown.php
+RUN sed -i "s,var wayf_URL = .*,var wayf_URL = \"https://${DS_FQDN}/WAYF\";," \
+    /var/www/simplesamlphp/templates/selectidp-dropdown.php
+RUN sed -i "s,var wayf_sp_handlerURL = .*,var wayf_sp_handlerURL = \"https://${AUTH_FQDN}/simplesaml/module.php/saml/sp/discoresp.php\";," \
+    /var/www/simplesamlphp/templates/selectidp-dropdown.php
 
 VOLUME /etc/cert
 ENV CERT_DIR=/etc/cert
