@@ -22,7 +22,7 @@ $config = array(
             'cron' => array('daily'),
             'sources' => array(
                 array(
-                    'src' => 'https://meatwiki.nii.ac.jp/confluence/download/attachments/6684843/cgidp-metadata.xml?version=3&modificationDate=1543890699000&api=v2'
+                    'src' => 'https://meatwiki.nii.ac.jp/confluence/download/attachments/6684843/cgidp-metadata.xml?api=v2'
                 )
             ),
             'outputDir' => 'metadata/attributeauthority-remote/',
