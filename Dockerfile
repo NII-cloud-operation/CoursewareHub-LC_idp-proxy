@@ -1,5 +1,7 @@
 FROM docker.io/centos:7
 
+ARG SIMPLESAMLPHP_VERSION="1.18.4"
+
 # Install packages
 ADD http://rpms.famillecollet.com/enterprise/remi-release-7.rpm /tmp/
 RUN set -x \
@@ -7,7 +9,7 @@ RUN set -x \
     && yum -y update \
     && yum -y install epel-release \
     && rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7 \
-    && yum -y install less which cronie logrotate supervisor \
+    && yum -y install less which cronie logrotate supervisor git unzip \
     && systemctl enable crond \
     && yum -y install yum-utils \
     # Install nginx and php
@@ -18,11 +20,11 @@ RUN set -x \
     #&& yum -y install http://rpms.famillecollet.com/enterprise/remi-release-7.rpm \
     && rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-remi \
     && yum -y install --enablerepo=remi-php71 composer \
-    && yum -y install --enablerepo=remi-php71 php php-fpm php-xml php-mcrypt php-gmp php-soap \
+    && yum -y install --enablerepo=remi-php71 php php-fpm php-xml php-mcrypt php-gmp php-soap php-ldap \
     && systemctl enable php-fpm \
     # Install simplesamlphp
     && cd /var/www \
-    && curl -Lo downloaded-simplesamlphp.tar.gz https://github.com/simplesamlphp/simplesamlphp/releases/download/v1.14.14/simplesamlphp-1.14.14.tar.gz \
+    && curl -Lo downloaded-simplesamlphp.tar.gz https://github.com/simplesamlphp/simplesamlphp/releases/download/v${SIMPLESAMLPHP_VERSION}/simplesamlphp-${SIMPLESAMLPHP_VERSION}.tar.gz \
     && tar xvfz downloaded-simplesamlphp.tar.gz \
     && mv $( ls | grep simplesaml | grep -v *tar.gz ) simplesamlphp \
     && rm /var/www/downloaded-simplesamlphp.tar.gz
@@ -30,7 +32,8 @@ RUN set -x \
 RUN set -x \
     # Install simplesamlphp-module-attributeaggregator
     && cd /var/www/simplesamlphp \
-    && composer require niif/simplesamlphp-module-attributeaggregator:1.*
+    && composer config repositories.attributeaggregator vcs https://github.com/NII-cloud-operation/simplesamlphp-module-attributeaggregator \
+    && composer require niif/simplesamlphp-module-attributeaggregator:dev-2.x-gakunin-cloud-gateway
 
 # Setup nginx
 # Copy the nginx configuration files
@@ -43,19 +46,12 @@ COPY resources/php-fpm/www.conf /etc/php-fpm.d/
 RUN chgrp nginx /var/lib/php/session \
     && mkdir -p /run/php-fpm
 
-# Apply the saml2 patch
-ARG SOAP_CLIENT_PHP="simplesamlphp/vendor/simplesamlphp/saml2/src/SAML2/SOAPClient.php"
-COPY resources/${SOAP_CLIENT_PHP} /var/www/${SOAP_CLIENT_PHP}
-# Apply the simplesamlphp-module-attributeaggregator patch
-COPY resources/simplesamlphp/attributeaggregator-gakunin-cgw.patch /var/www/simplesamlphp/modules/attributeaggregator/
-RUN yum -y update && yum -y install patch && \
-    cd /var/www/simplesamlphp/modules/attributeaggregator/ && cat attributeaggregator-gakunin-cgw.patch | patch -p1 && \
-    rm attributeaggregator-gakunin-cgw.patch
-
 # Setup simplesamlphp
+ARG SIMPLESAMLPHP_METAREFRESH_CONFIG="config-metarefresh.php"
 RUN set -x \
     && mkdir -p /var/www/simplesamlphp/metadata/xml \
     && touch /var/www/simplesamlphp/modules/cron/enable \
+    && touch /var/www/simplesamlphp/modules/statistics/disable \
     && touch /var/www/simplesamlphp/modules/metarefresh/enable \
     && cp /var/www/simplesamlphp/modules/cron/config-templates/*.php /var/www/simplesamlphp/config/ \
     && mkdir -p /var/www/simplesamlphp/metadata/gakunin-metadata \
@@ -64,7 +60,7 @@ RUN set -x \
     && chown -R nginx:nginx /var/www/simplesamlphp
 COPY resources/simplesamlphp/config/config.php /var/www/simplesamlphp/config
 COPY resources/simplesamlphp/config/authsources.php /var/www/simplesamlphp/config
-COPY resources/simplesamlphp/config/config-metarefresh.php /var/www/simplesamlphp/config
+COPY resources/simplesamlphp/config/${SIMPLESAMLPHP_METAREFRESH_CONFIG} /var/www/simplesamlphp/config/config-metarefresh.php
 COPY resources/simplesamlphp/bin/add_auth_proxy_metadata.php /var/www/simplesamlphp/bin
 COPY resources/simplesamlphp/bin/remove_auth_proxy_metadata.php /var/www/simplesamlphp/bin
 COPY resources/simplesamlphp/bin/auth_proxy_functions.php /var/www/simplesamlphp/bin
@@ -76,6 +72,21 @@ COPY resources/simplesamlphp/bin/add_auth_proxy.sh /usr/local/sbin/
 COPY bin/start.sh /start.sh
 RUN chmod +x /start.sh \
              /usr/local/sbin/add_auth_proxy.sh
+
+# Setup simplesamlphp config
+ARG AUTH_FQDN="nbhub.ecloud.nii.ac.jp"
+ARG DS_FQDN="ds.gakunin.nii.ac.jp"
+ARG CG_FQDN="cg.gakunin.jp"
+RUN sed -i "s;'entityID' => .*;'entityID' => 'https://${AUTH_FQDN}/shibboleth-sp',;" \
+    /var/www/simplesamlphp/config/authsources.php
+RUN sed -i "s;'entityId' => .*;'entityId' => 'https://${CG_FQDN}/idp/shibboleth',;" \
+    /var/www/simplesamlphp/config/config.php
+RUN sed -i "s,var embedded_wayf_URL = .*,var embedded_wayf_URL = \"https://${DS_FQDN}/WAYF/embedded-wayf.js\";," \
+    /var/www/simplesamlphp/templates/selectidp-dropdown.php
+RUN sed -i "s,var wayf_URL = .*,var wayf_URL = \"https://${DS_FQDN}/WAYF\";," \
+    /var/www/simplesamlphp/templates/selectidp-dropdown.php
+RUN sed -i "s,var wayf_sp_handlerURL = .*,var wayf_sp_handlerURL = \"https://${AUTH_FQDN}/simplesaml/module.php/saml/sp/discoresp.php\";," \
+    /var/www/simplesamlphp/templates/selectidp-dropdown.php
 
 VOLUME /etc/cert
 ENV CERT_DIR=/etc/cert
