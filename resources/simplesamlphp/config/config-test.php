@@ -1201,6 +1201,7 @@ $config = [
         ['type' => 'flatfile', 'directory' => 'metadata/attributeauthority-remote'],
         ['type' => 'flatfile', 'directory' => 'metadata/open-idp-metadata'],
         ['type' => 'xml', 'file' => 'metadata/xml/auth-proxies.xml'],
+        ['type' => 'xml', 'file' => 'metadata/xml/cgidp-metadata.xml'],
     ],
 
     /*

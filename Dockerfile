@@ -47,6 +47,7 @@ RUN chgrp nginx /var/lib/php/session \
     && mkdir -p /run/php-fpm
 
 # Setup simplesamlphp
+ARG SIMPLESAMLPHP_CONFIG="config.php"
 ARG SIMPLESAMLPHP_METAREFRESH_CONFIG="config-metarefresh.php"
 RUN set -x \
     && mkdir -p /var/www/simplesamlphp/metadata/xml \
@@ -58,7 +59,7 @@ RUN set -x \
                 /var/www/simplesamlphp/metadata/attributeauthority-remote \
                 /var/www/simplesamlphp/metadata/open-idp-metadata \
     && chown -R nginx:nginx /var/www/simplesamlphp
-COPY resources/simplesamlphp/config/config.php /var/www/simplesamlphp/config
+COPY resources/simplesamlphp/config/${SIMPLESAMLPHP_CONFIG} /var/www/simplesamlphp/config/config.php
 COPY resources/simplesamlphp/config/authsources.php /var/www/simplesamlphp/config
 COPY resources/simplesamlphp/config/${SIMPLESAMLPHP_METAREFRESH_CONFIG} /var/www/simplesamlphp/config/config-metarefresh.php
 COPY resources/simplesamlphp/bin/add_auth_proxy_metadata.php /var/www/simplesamlphp/bin
