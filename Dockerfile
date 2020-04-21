@@ -32,7 +32,7 @@ RUN set -x \
 RUN set -x \
     # Install simplesamlphp-module-attributeaggregator
     && cd /var/www/simplesamlphp \
-    && composer config repositories.attributeaggregator vcs https://github.com/NII-cloud-operation/simplesamlphp-module-attributeaggregator \
+    && composer config repositories.attributeaggregator '{"type": "vcs", "url": "https://github.com/NII-cloud-operation/simplesamlphp-module-attributeaggregator", "no-api": true}' \
     && composer require niif/simplesamlphp-module-attributeaggregator:dev-2.x-gakunin-cloud-gateway
 
 # Setup nginx
