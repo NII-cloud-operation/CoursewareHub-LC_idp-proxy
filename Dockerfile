@@ -20,7 +20,7 @@ RUN set -x \
     #&& yum -y install http://rpms.famillecollet.com/enterprise/remi-release-7.rpm \
     && rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-remi \
     && yum -y install --enablerepo=remi-php73 composer \
-    && yum -y install --enablerepo=remi-php73 php php-fpm php-xml php-mcrypt php-gmp php-soap php-ldap \
+    && yum -y install --enablerepo=remi-php73 php php-fpm php-xml php-gmp php-soap php-ldap \
     && systemctl enable php-fpm \
     # Install simplesamlphp
     && cd /var/www \
