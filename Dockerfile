@@ -1,6 +1,6 @@
 FROM docker.io/centos:7
 
-ARG SIMPLESAMLPHP_VERSION="1.18.4"
+ARG SIMPLESAMLPHP_VERSION="1.18.8"
 
 # Install packages
 ADD http://rpms.famillecollet.com/enterprise/remi-release-7.rpm /tmp/
