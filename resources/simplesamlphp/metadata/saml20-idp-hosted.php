@@ -22,6 +22,8 @@ $metadata['__DYNAMIC:1__'] = array(
 	 */
 	'auth' => 'default-sp',
 
+	'assertion.encryption' => true,
+
 	/*
 	 * WARNING: SHA-1 is disallowed starting January the 1st, 2014.
 	 *
