@@ -10,8 +10,8 @@ $config = array(
                     'certificates' => array(
                         'gakunin-signer.cer'
                     ),
-                    'validateFingerprint' => '36:B6:60:0A:EF:05:A9:BE:B2:E9:79:09:EC:E4:CB:A5:28:D5:DB:71',
-                    'validateFingerprintAlgorithm' => 'XMLSecurityDSig::SHA1'
+                    'validateFingerprint' => 'FA:11:11:5B:EC:13:4D:55:85:AF:60:32:E1:6C:01:01:EF:9C:A0:6B:17:8C:8B:9C:7F:2B:69:41:EB:68:30:1E',
+                    'validateFingerprintAlgorithm' => 'XMLSecurityDSig::SHA256'
                 )
             ),
             'outputDir' => 'metadata/gakunin-metadata/',
