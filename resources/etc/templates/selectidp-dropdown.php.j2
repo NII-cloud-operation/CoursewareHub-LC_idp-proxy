@@ -39,7 +39,7 @@ foreach ($this->data['idplist'] as $idpentry) {
 // URL of the WAYF to use
 // Examples: "https://wayf.switch.ch/SWITCHaai/WAYF", "https://wayf-test.switch.ch/aaitest/WAYF";
 // [Mandatory]
-var wayf_URL = "https://ds.gakunin.nii.ac.jp/WAYF";
+var wayf_URL = "https://{{ env("DS_FQDN", default="ds.gakunin.nii.ac.jp") }}/WAYF";
 
 // EntityID of the Service Provider that protects this Resource
 // Examples: "https://econf.switch.ch/shibboleth", "https://dokeos.unige.ch/shibboleth"
@@ -49,7 +49,7 @@ var wayf_sp_entityID = "<?php echo htmlspecialchars($this->data['entityID']); ?>
 // Shibboleth Service Provider handler URL
 // Examples: "https://point.switch.ch/Shibboleth.sso", "https://rr.aai.switch.ch/aaitest/Shibboleth.sso"
 // [Mandatory, if wayf_use_discovery_service = false]
-var wayf_sp_handlerURL = "https://nbhub.ecloud.nii.ac.jp/simplesaml/module.php/saml/sp/discoresp.php";
+var wayf_sp_handlerURL = "https://{{ env("AUTH_FQDN") }}/simplesaml/module.php/saml/sp/discoresp.php";
 
 // URL on this resource that the user shall be returned to after authentication
 // Examples: "https://econf.switch.ch/aai/home", "https://olat.uzh.ch/my/courses"
@@ -288,7 +288,7 @@ var wayf_additional_idps = [
 </script>
 
 <script type="text/javascript" charset="UTF-8"><!--
-var embedded_wayf_URL = "https://ds.gakunin.nii.ac.jp/WAYF/embedded-wayf.js";
+var embedded_wayf_URL = "https://{{ env("DS_FQDN", default="ds.gakunin.nii.ac.jp") }}/WAYF/embedded-wayf.js";
 document.write('<script type="text/javascript" src="' + embedded_wayf_URL + '?' + (new Date().getTime()) + '"></scr'+'ipt>');
 //-->
 </script>

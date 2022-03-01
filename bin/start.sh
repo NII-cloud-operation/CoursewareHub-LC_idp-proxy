@@ -11,26 +11,20 @@ cp -p $CERT_DIR/idp-proxy.cer /var/www/simplesamlphp/cert/
 cp -p $CERT_DIR/idp-proxy.key /var/www/simplesamlphp/cert/
 cp -p $CERT_DIR/gakunin-signer.cer /var/www/simplesamlphp/cert/
 
-# Set cron job to update metadata
-echo "@reboot /usr/bin/sleep 10 && /usr/bin/curl --silent --insecure \"https://localhost/simplesaml/module.php/cron/cron.php?key=$CRON_SECRET&tag=daily\" > /dev/null 2>&1" > /var/spool/cron/root
-echo "0 0 * * * /usr/bin/curl --silent --insecure \"https://localhost/simplesaml/module.php/cron/cron.php?key=$CRON_SECRET&tag=daily\" > /dev/null 2>&1" >> /var/spool/cron/root
+# Setup config files
+TEMPLATE_DIR=/etc/templates
 
-# Setup simplesamlphp config module
-cat << EOS > /var/www/simplesamlphp/config/module_cron.php
-<?php
-/*
- * Configuration for the Cron module.
- */
+j2 ${TEMPLATE_DIR}/config.php.j2 -o /var/www/simplesamlphp/config/config.php
+j2 ${TEMPLATE_DIR}/selectidp-dropdown.php.j2 -o /var/www/simplesamlphp/templates/selectidp-dropdown.php
+j2 ${TEMPLATE_DIR}/authsources.php.j2 -o /var/www/simplesamlphp/config/authsources.php
+j2 ${TEMPLATE_DIR}/module_cron.php.j2 -o /var/www/simplesamlphp/config/module_cron.php
+j2 ${TEMPLATE_DIR}/cron_root.j2 -o /var/spool/cron/root
 
-\$config = array (
-
-        'key' => '${CRON_SECRET}',
-        'allowed_tags' => array('daily', 'hourly', 'frequent'),
-        'debug_message' => TRUE,
-        'sendemail' => FALSE,
-
-);
-EOS
-
+touch /var/www/simplesamlphp/modules/metarefresh/enable
+if [[ "$ENABLE_TEST_FEDERATION" == "1" || "$ENABLE_TEST_FEDERATION" == "yes" ]]; then
+   j2 ${TEMPLATE_DIR}/config-metarefresh-test.php.j2 -o /var/www/simplesamlphp/config/config-metarefresh-test.php
+else
+   j2 ${TEMPLATE_DIR}/config-metarefresh.php.j2 -o /var/www/simplesamlphp/config/config-metarefresh.php
+fi
 
 /usr/bin/supervisord -n -c /etc/supervisord.conf
