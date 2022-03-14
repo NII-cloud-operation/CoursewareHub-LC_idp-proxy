@@ -1,6 +1,6 @@
 FROM docker.io/centos:7
 
-ARG SIMPLESAMLPHP_VERSION="1.18.8"
+ARG SIMPLESAMLPHP_VERSION="1.19.5"
 
 # Install packages
 ADD http://rpms.famillecollet.com/enterprise/remi-release-7.rpm /tmp/
@@ -19,8 +19,13 @@ RUN set -x \
     && rm /tmp/remi-release-7.rpm \
     #&& yum -y install http://rpms.famillecollet.com/enterprise/remi-release-7.rpm \
     && rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-remi \
-    && yum -y install --enablerepo=remi-php73 composer \
-    && yum -y install --enablerepo=remi-php73 php php-fpm php-xml php-gmp php-soap php-ldap \
+    && yum -y install --enablerepo=remi-php80 php php-fpm php-xml php-gmp php-soap php-ldap \
+    && php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
+    && php -r "if (hash_file('sha384', 'composer-setup.php') === '906a84df04cea2aa72f40b5f787e49f22d4c2f19492ac310e8cba5b96ac8b64115ac402c8cd292b8a03482574915d1a8') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;" \
+    && php composer-setup.php \
+    && php -r "unlink('composer-setup.php');" \
+    && mv composer.phar /usr/local/bin/composer \
+    && chmod +x /usr/local/bin/composer \
     && systemctl enable php-fpm \
     # Install simplesamlphp
     && cd /var/www \
@@ -32,8 +37,9 @@ RUN set -x \
 RUN set -x \
     # Install simplesamlphp-module-attributeaggregator
     && cd /var/www/simplesamlphp \
+    && composer require --dev -W "simplesamlphp/simplesamlphp-test-framework:^1.1.5" "phpunit/phpunit:^7.5|^8.5|^9.5" "vimeo/psalm:^4.17" \
     && composer config repositories.attributeaggregator '{"type": "vcs", "url": "https://github.com/NII-cloud-operation/simplesamlphp-module-attributeaggregator", "no-api": true}' \
-    && composer require niif/simplesamlphp-module-attributeaggregator:dev-2.x-gakunin-cloud-gateway
+    && composer require --update-no-dev niif/simplesamlphp-module-attributeaggregator:dev-2.x-gakunin-cloud-gateway
 
 # Setup nginx
 # Copy the nginx configuration files
