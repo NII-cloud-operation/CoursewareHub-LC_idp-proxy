@@ -1072,7 +1072,7 @@ $config = [
 
         69 => array(
             'class' => 'attributeaggregator:attributeaggregator',
-            'entityId' => 'https://cg.gakunin.jp/idp/shibboleth',
+            'entityId' => 'https://{{ env("CG_FQDN", default="cg.gakunin.jp") }}/idp/shibboleth',
 
             /**
              * The subject of the attribute query. Default: urn:oid:1.3.6.1.4.1.5923.1.1.1.6 (eduPersonPrincipalName)
