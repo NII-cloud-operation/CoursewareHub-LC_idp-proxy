@@ -22,7 +22,7 @@ j2 ${TEMPLATE_DIR}/cron_root.j2 -o /var/spool/cron/root
 
 touch /var/www/simplesamlphp/modules/metarefresh/enable
 if [[ "$ENABLE_TEST_FEDERATION" == "1" || "$ENABLE_TEST_FEDERATION" == "yes" ]]; then
-   j2 ${TEMPLATE_DIR}/config-metarefresh-test.php.j2 -o /var/www/simplesamlphp/config/config-metarefresh-test.php
+   j2 ${TEMPLATE_DIR}/config-metarefresh-test.php.j2 -o /var/www/simplesamlphp/config/config-metarefresh.php
 else
    j2 ${TEMPLATE_DIR}/config-metarefresh.php.j2 -o /var/www/simplesamlphp/config/config-metarefresh.php
 fi
