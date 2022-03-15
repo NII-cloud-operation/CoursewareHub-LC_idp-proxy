@@ -32,12 +32,17 @@ RUN set -x \
     && curl -Lo downloaded-simplesamlphp.tar.gz https://github.com/simplesamlphp/simplesamlphp/releases/download/v${SIMPLESAMLPHP_VERSION}/simplesamlphp-${SIMPLESAMLPHP_VERSION}.tar.gz \
     && tar xvfz downloaded-simplesamlphp.tar.gz \
     && mv $( ls | grep simplesaml | grep -v *tar.gz ) simplesamlphp \
-    && rm /var/www/downloaded-simplesamlphp.tar.gz
+    && rm /var/www/downloaded-simplesamlphp.tar.gz \
+    && cd /var/www/simplesamlphp \
+    && composer require --dev -W \
+        "simplesamlphp/simplesamlphp-test-framework:^1.1.5" \
+        "phpunit/phpunit:^7.5|^8.5|^9.5" "vimeo/psalm:^4.17" \
+    && composer require -W \
+        "simplesamlphp/saml2:~4.2.5, <4.2.8" # workaround for "Error: Undefined constant SoapClient::SOAP_1_1"
 
 RUN set -x \
     # Install simplesamlphp-module-attributeaggregator
     && cd /var/www/simplesamlphp \
-    && composer require --dev -W "simplesamlphp/simplesamlphp-test-framework:^1.1.5" "phpunit/phpunit:^7.5|^8.5|^9.5" "vimeo/psalm:^4.17" \
     && composer config repositories.attributeaggregator '{"type": "vcs", "url": "https://github.com/NII-cloud-operation/simplesamlphp-module-attributeaggregator", "no-api": true}' \
     && composer require --update-no-dev niif/simplesamlphp-module-attributeaggregator:dev-2.x-gakunin-cloud-gateway
 
