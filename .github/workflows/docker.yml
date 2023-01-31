@@ -34,3 +34,6 @@ jobs:
           context: ./
           push: true
           tags: "${{ secrets.DOCKERHUB_NAMESPACE }}/coursewarehub-idp-proxy:${{ steps.extract_branch.outputs.branch }}"
+          build-args: |
+            ATTRIBUTE_AGGREGATOR_URL=${{ vars.ATTRIBUTE_AGGREGATOR_URL || 'https://github.com/NII-cloud-operation/simplesamlphp-module-attributeaggregator' }}
+            ATTRIBUTE_AGGREGATOR_BRANCH=${{ vars.ATTRIBUTE_AGGREGATOR_BRANCH || 'dev-2.x-gakunin-cloud-gateway' }}
