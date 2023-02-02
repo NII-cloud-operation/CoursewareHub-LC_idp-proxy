@@ -10,7 +10,7 @@ RUN set -x \
     && dnf -y update \
     && dnf -y install epel-release \
     && rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-8 \
-    && dnf -y install less which cronie logrotate supervisor git unzip \
+    && dnf -y install less which cronie logrotate supervisor git unzip findutils \
     && systemctl enable crond \
     && dnf -y install yum-utils \
     # Install nginx and php
