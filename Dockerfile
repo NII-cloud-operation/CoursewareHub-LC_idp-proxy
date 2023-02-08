@@ -1,27 +1,28 @@
-FROM docker.io/centos:7
+FROM rockylinux:8
 
-ARG SIMPLESAMLPHP_VERSION="1.19.5"
+ARG SIMPLESAMLPHP_VERSION="1.19.7"
+ARG ATTRIBUTE_AGGREGATOR_URL="https://github.com/NII-cloud-operation/simplesamlphp-module-attributeaggregator"
+ARG ATTRIBUTE_AGGREGATOR_BRANCH="dev-2.x-gakunin-cloud-gateway"
 
 # Install packages
-ADD http://rpms.famillecollet.com/enterprise/remi-release-7.rpm /tmp/
 RUN set -x \
-    && rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7 \
-    && yum -y update \
-    && yum -y install epel-release \
-    && rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7 \
-    && yum -y install less which cronie logrotate supervisor git unzip \
+    && rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-rockyofficial \
+    && dnf -y update \
+    && dnf -y install epel-release \
+    && rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-8 \
+    && dnf -y install less which cronie logrotate supervisor git unzip findutils \
     && systemctl enable crond \
-    && yum -y install yum-utils \
+    && dnf -y install yum-utils \
     # Install nginx and php
-    && yum -y install --enablerepo=epel nginx python3 python3-pip \
+    && dnf -y install --enablerepo=epel nginx python3 python3-pip \
     && systemctl enable nginx \
-    && rpm -Uvh /tmp/remi-release-7.rpm \
-    && rm /tmp/remi-release-7.rpm \
-    #&& yum -y install http://rpms.famillecollet.com/enterprise/remi-release-7.rpm \
-    && rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-remi \
-    && yum -y install --enablerepo=remi-php80 php php-fpm php-xml php-gmp php-soap php-ldap \
+    && dnf -y install https://rpms.remirepo.net/enterprise/remi-release-8.rpm \
+    && rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-remi.el8 \
+    && dnf -y module reset php \
+    && dnf -y module install php:remi-8.1 \
+    && dnf -y install --enablerepo=remi php php-fpm php-xml php-gmp php-soap php-ldap \
     && php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
-    && php -r "if (hash_file('sha384', 'composer-setup.php') === '906a84df04cea2aa72f40b5f787e49f22d4c2f19492ac310e8cba5b96ac8b64115ac402c8cd292b8a03482574915d1a8') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;" \
+    && php -r "if (hash_file('sha384', 'composer-setup.php') === '55ce33d7678c5a611085589f1f3ddf8b3c52d662cd01d4ba75c0ee0459970c2200a51f492d557530c71c15d8dba01eae') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;" \
     && php composer-setup.php \
     && php -r "unlink('composer-setup.php');" \
     && mv composer.phar /usr/local/bin/composer \
@@ -36,15 +37,13 @@ RUN set -x \
     && cd /var/www/simplesamlphp \
     && composer require --dev -W \
         "simplesamlphp/simplesamlphp-test-framework:^1.1.5" \
-        "phpunit/phpunit:^7.5|^8.5|^9.5" "vimeo/psalm:^4.17" \
-    && composer require -W \
-        "simplesamlphp/saml2:~4.2.5, <4.2.8" # workaround for "Error: Undefined constant SoapClient::SOAP_1_1"
+        "phpunit/phpunit:^7.5|^8.5|^9.5" "vimeo/psalm:^4.17"
 
 RUN set -x \
     # Install simplesamlphp-module-attributeaggregator
     && cd /var/www/simplesamlphp \
-    && composer config repositories.attributeaggregator '{"type": "vcs", "url": "https://github.com/NII-cloud-operation/simplesamlphp-module-attributeaggregator", "no-api": true}' \
-    && composer require --update-no-dev niif/simplesamlphp-module-attributeaggregator:dev-2.x-gakunin-cloud-gateway
+    && composer config repositories.attributeaggregator "{\"type\": \"vcs\", \"url\": \"${ATTRIBUTE_AGGREGATOR_URL}\", \"no-api\": true}" \
+    && composer require --update-no-dev niif/simplesamlphp-module-attributeaggregator:${ATTRIBUTE_AGGREGATOR_BRANCH}
 
 # Setup nginx
 # Copy the nginx configuration files
