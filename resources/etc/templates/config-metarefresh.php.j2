@@ -29,6 +29,17 @@ $config = array(
             'outputFormat' => 'flatfile',
             'expireAfter' => 60*60*24*4
         ),
+        'orthros-metadata' => array(
+            'cron' => array('daily'),
+            'sources' => array(
+                array(
+                    'src' => 'https://core.orthros.gakunin.nii.ac.jp/metadata/orthros-idp-metadata.xml',
+                )
+            ),
+            'outputDir' => 'metadata/orthros-metadata/',
+            'outputFormat' => 'flatfile',
+            'expireAfter' => 60*60*24*4
+        ),
         'open-idp-metadata' => array(
             'cron' => array('daily'),
             'sources' => array(
