@@ -1023,6 +1023,8 @@ $config = [
         ],
         */
 
+	{% set disable_cloud_gateway = env("DISABLE_CLOUD_GATEWAY", "no") %}
+	{% if disable_cloud_gateway!="1" and disable_cloud_gateway!="yes" %}
         59 => array(
             'class' => 'attributeaggregator:attributeaggregator',
             'entityId' => 'https://{{ env("CG_FQDN", default="cg.gakunin.jp") }}/idp/shibboleth',
@@ -1116,6 +1118,7 @@ $config = [
             //         "urn:oid:attribute-OID-4" => array ()
                    ),
          ),
+	 {% endif %}
 
         /*
          * Generate the 'group' attribute populated from other variables, including eduPersonAffiliation.
