@@ -1,4 +1,4 @@
-FROM rockylinux:8
+FROM rockylinux:9
 
 ARG SIMPLESAMLPHP_VERSION="1.19.7"
 ARG ATTRIBUTE_AGGREGATOR_URL="https://github.com/NII-cloud-operation/simplesamlphp-module-attributeaggregator"
@@ -6,18 +6,18 @@ ARG ATTRIBUTE_AGGREGATOR_BRANCH="dev-2.x-gakunin-cloud-gateway"
 
 # Install packages
 RUN set -x \
-    && rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-rockyofficial \
+    && rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-Rocky-9 \
     && dnf -y update \
     && dnf -y install epel-release \
-    && rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-8 \
+    && rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-9 \
     && dnf -y install less which cronie logrotate supervisor git unzip findutils \
     && systemctl enable crond \
     && dnf -y install yum-utils \
     # Install nginx and php
     && dnf -y install --enablerepo=epel nginx python3 python3-pip \
     && systemctl enable nginx \
-    && dnf -y install https://rpms.remirepo.net/enterprise/remi-release-8.rpm \
-    && rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-remi.el8 \
+    && dnf -y install https://rpms.remirepo.net/enterprise/remi-release-9.rpm \
+    && rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-remi.el9 \
     && dnf -y module reset php \
     && dnf -y module install php:remi-8.1 \
     && dnf -y install --enablerepo=remi php php-fpm php-xml php-gmp php-soap php-ldap \
