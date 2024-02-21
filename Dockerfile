@@ -1,6 +1,6 @@
 FROM rockylinux:9
 
-ARG SIMPLESAMLPHP_VERSION="1.19.7"
+ARG SIMPLESAMLPHP_VERSION="2.1.3"
 ARG ATTRIBUTE_AGGREGATOR_URL="https://github.com/NII-cloud-operation/simplesamlphp-module-attributeaggregator"
 ARG ATTRIBUTE_AGGREGATOR_BRANCH="dev-2.x-gakunin-cloud-gateway"
 
@@ -10,7 +10,7 @@ RUN set -x \
     && dnf -y update \
     && dnf -y install epel-release \
     && rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-9 \
-    && dnf -y install less which cronie logrotate supervisor git unzip findutils \
+    && dnf -y install less which cronie logrotate supervisor git unzip findutils patch \
     && systemctl enable crond \
     && dnf -y install yum-utils \
     # Install nginx and php
@@ -30,25 +30,25 @@ RUN set -x \
     && systemctl enable php-fpm \
     # Install simplesamlphp
     && cd /var/www \
-    && curl -Lo downloaded-simplesamlphp.tar.gz https://github.com/simplesamlphp/simplesamlphp/releases/download/v${SIMPLESAMLPHP_VERSION}/simplesamlphp-${SIMPLESAMLPHP_VERSION}.tar.gz \
+    && curl -Lo downloaded-simplesamlphp.tar.gz https://github.com/simplesamlphp/simplesamlphp/releases/download/v${SIMPLESAMLPHP_VERSION}/simplesamlphp-${SIMPLESAMLPHP_VERSION}-full.tar.gz \
     && tar xvfz downloaded-simplesamlphp.tar.gz \
     && mv $( ls | grep simplesaml | grep -v *tar.gz ) simplesamlphp \
     && rm /var/www/downloaded-simplesamlphp.tar.gz \
-    && cd /var/www/simplesamlphp \
-    && composer require --dev -W \
-        "simplesamlphp/simplesamlphp-test-framework:^1.1.5" \
-        "phpunit/phpunit:^7.5|^8.5|^9.5" "vimeo/psalm:^4.17"
-
-RUN set -x \
     # Install simplesamlphp-module-attributeaggregator
     && cd /var/www/simplesamlphp \
     && composer config repositories.attributeaggregator "{\"type\": \"vcs\", \"url\": \"${ATTRIBUTE_AGGREGATOR_URL}\", \"no-api\": true}" \
     && composer require --update-no-dev niif/simplesamlphp-module-attributeaggregator:${ATTRIBUTE_AGGREGATOR_BRANCH}
 
+# Patch simplesamlphp
+COPY resources/simplesamlphp/simplesamlphp.patch /tmp/
+RUN set -x \
+    && cd /var/www/simplesamlphp \
+    && patch -p1 < /tmp/simplesamlphp.patch \
+    && rm -f /tmp/simplesamlphp.patch
+
 # Setup nginx
 # Copy the nginx configuration files
 COPY resources/nginx/nginx.conf /etc/nginx/
-COPY resources/nginx/idp-proxy.conf /etc/nginx/conf.d/
 RUN mkdir -p /etc/pki/nginx/private/
 
 # Setup php-fpm
@@ -59,10 +59,6 @@ RUN chgrp nginx /var/lib/php/session \
 # Setup simplesamlphp
 RUN set -x \
     && mkdir -p /var/www/simplesamlphp/metadata/xml \
-    && touch /var/www/simplesamlphp/modules/cron/enable \
-    && touch /var/www/simplesamlphp/modules/statistics/disable \
-    && touch /var/www/simplesamlphp/modules/metarefresh/enable \
-    && cp /var/www/simplesamlphp/modules/cron/config-templates/*.php /var/www/simplesamlphp/config/ \
     && mkdir -p /var/www/simplesamlphp/metadata/gakunin-metadata \
                 /var/www/simplesamlphp/metadata/attributeauthority-remote \
                 /var/www/simplesamlphp/metadata/open-idp-metadata \
@@ -70,8 +66,10 @@ RUN set -x \
 COPY resources/simplesamlphp/bin/add_auth_proxy_metadata.php /var/www/simplesamlphp/bin
 COPY resources/simplesamlphp/bin/remove_auth_proxy_metadata.php /var/www/simplesamlphp/bin
 COPY resources/simplesamlphp/bin/auth_proxy_functions.php /var/www/simplesamlphp/bin
-COPY resources/simplesamlphp/metadata/saml20-idp-hosted.php /var/www/simplesamlphp/metadata
 COPY resources/simplesamlphp/metadata/xml/auth-proxies.xml /var/www/simplesamlphp/metadata/xml
+COPY resources/simplesamlphp/templates/selectidp-dropdown.twig /var/www/simplesamlphp/templates
+COPY resources/simplesamlphp/templates/selectidp-embedded-wayf-start.twig /var/www/simplesamlphp/templates/includes
+COPY resources/simplesamlphp/templates/selectidp-embedded-wayf-end.twig /var/www/simplesamlphp/templates/includes
 COPY resources/saml/www/sp/discoresp.php /var/www/simplesamlphp/modules/saml/www/sp/discoresp.php
 COPY resources/simplesamlphp/bin/add_auth_proxy.sh /usr/local/sbin/
 COPY bin/start.sh /start.sh

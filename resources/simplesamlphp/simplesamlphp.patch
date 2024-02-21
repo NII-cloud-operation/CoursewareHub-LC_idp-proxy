@@ -1,0 +1,114 @@
+diff -urN simplesamlphp-2.1.1.org/modules/saml/routing/routes/routes.yml simplesamlphp-2.1.1/modules/saml/routing/routes/routes.yml
+--- simplesamlphp-2.1.1.org/modules/saml/routing/routes/routes.yml	2023-11-30 01:51:18.000000000 +0900
++++ simplesamlphp-2.1.1/modules/saml/routing/routes/routes.yml	2024-02-15 17:07:41.913566972 +0900
+@@ -21,6 +21,13 @@
+   }
+   methods: [GET]
+ 
++saml-legacy-sp-discoResponse:
++  path: /sp/discoresp.php
++  defaults: {
++    _controller: 'SimpleSAML\Module\saml\Controller\ServiceProvider::discoResponse'
++  }
++  methods: [GET]
++
+ saml-sp-login:
+   path: /sp/login/{sourceId}
+   defaults: {
+diff -urN simplesamlphp-2.1.1.org/modules/saml/src/Auth/Source/SP.php simplesamlphp-2.1.1/modules/saml/src/Auth/Source/SP.php
+--- simplesamlphp-2.1.1.org/modules/saml/src/Auth/Source/SP.php	2023-11-30 01:51:18.000000000 +0900
++++ simplesamlphp-2.1.1/modules/saml/src/Auth/Source/SP.php	2024-02-08 18:00:31.882041163 +0900
+@@ -112,6 +112,7 @@
+         $this->entityId = $entityId;
+         $this->idp = $this->metadata->getOptionalString('idp', null);
+         $this->discoURL = $this->metadata->getOptionalString('discoURL', null);
++        $this->discoReturnURL = $this->metadata->getOptionalString('discoReturnURL', 'saml/sp/discoResponse');
+         $this->disable_scoping = $this->metadata->getOptionalBoolean('disable_scoping', false);
+         $this->passAuthnContextClassRef = $this->metadata->getOptionalBoolean(
+             'proxymode.passAuthnContextClassRef',
+@@ -708,7 +709,7 @@
+             $discoURL = Module::getModuleURL('saml/disco');
+         }
+ 
+-        $returnTo = Module::getModuleURL('saml/sp/discoResponse', ['AuthID' => $id]);
++        $returnTo = Module::getModuleURL($this->discoReturnURL, ['AuthID' => $id]);
+ 
+         $params = [
+             'entityID' => $this->entityId,
+diff -urN simplesamlphp-2.1.1.org/modules/saml/src/Controller/Disco.php simplesamlphp-2.1.1/modules/saml/src/Controller/Disco.php
+--- simplesamlphp-2.1.1.org/modules/saml/src/Controller/Disco.php	2023-11-30 01:51:18.000000000 +0900
++++ simplesamlphp-2.1.1/modules/saml/src/Controller/Disco.php	2024-02-15 16:49:12.394125909 +0900
+@@ -39,6 +39,16 @@
+     public function disco(): RunnableResponse
+     {
+         $disco = new IdPDisco(['saml20-idp-remote'], 'saml');
+-        return new RunnableResponse([$disco, 'handleRequest']);
++        $response = new RunnableResponse([$disco, 'handleRequest']);
++
++        /* override Content-Security-Policy for embedded DS */
++        $headers = $this->config->getOptionalArray('disco.headers.security', []);
++        foreach ($headers as $header => $value) {
++            if (!$response->headers->has($header)) {
++                $response->headers->set($header, $value);
++            }
++        }
++
++        return $response;
+     }
+ }
+diff -urN simplesamlphp-2.1.1.org/modules/saml/src/Controller/Metadata.php simplesamlphp-2.1.1/modules/saml/src/Controller/Metadata.php
+--- simplesamlphp-2.1.1.org/modules/saml/src/Controller/Metadata.php	2023-11-30 01:51:18.000000000 +0900
++++ simplesamlphp-2.1.1/modules/saml/src/Controller/Metadata.php	2024-02-14 21:07:56.489583730 +0900
+@@ -87,6 +87,7 @@
+                 $idpentityid = $this->mdHandler->getMetaDataCurrentEntityID('saml20-idp-hosted');
+             }
+             $metaArray = SAML2_IdP::getHostedMetadata($idpentityid, $this->mdHandler);
++            $metaConfig = $this->mdHandler->getMetaDataConfig($idpentityid, $metaArray['metadata-set']);
+ 
+             $metaBuilder = new SSPMetadata\SAMLBuilder($idpentityid);
+             $metaBuilder->addMetadataIdP20($metaArray);
+@@ -95,7 +96,7 @@
+             $metaxml = $metaBuilder->getEntityDescriptorText();
+ 
+             // sign the metadata if enabled
+-            $metaxml = SSPMetadata\Signer::sign($metaxml, $metaArray, 'SAML 2 IdP');
++            $metaxml = SSPMetadata\Signer::sign($metaxml, $metaConfig->toArray(), 'SAML 2 IdP');
+ 
+             $response = new Response();
+             $response->setEtag(hash('sha256', $metaxml));
+diff -urN simplesamlphp-2.1.1.org/modules/saml/src/Controller/ServiceProvider.php simplesamlphp-2.1.1/modules/saml/src/Controller/ServiceProvider.php
+--- simplesamlphp-2.1.1.org/modules/saml/src/Controller/ServiceProvider.php	2023-11-30 01:51:18.000000000 +0900
++++ simplesamlphp-2.1.1/modules/saml/src/Controller/ServiceProvider.php	2024-02-15 17:23:06.961684962 +0900
+@@ -140,15 +140,28 @@
+      */
+     public function discoResponse(Request $request): RunnableResponse
+     {
+-        if (!$request->query->has('AuthID')) {
++        if ($request->query->has('target')) {
++            $target_query = parse_url($request->query->get('target'), PHP_URL_QUERY);
++            parse_str($target_query, $req);
++        } else {
++            $req = [];
++        }
++
++        if ($request->query->has('AuthID')) {
++            $authId = $request->query->get('AuthID');
++        } else if (array_key_exists('AuthID', $req)) {
++            $authId = $req['AuthID'];
++        } else {
+             throw new Error\BadRequest('Missing AuthID to discovery service response handler');
+         }
+-        $authId = $request->query->get('AuthID');
+ 
+-        if (!$request->query->has('idpentityid')) {
++        if ($request->query->has('entityID')) {
++            $idpEntityId = $request->query->get('entityID');
++        } else if ($request->query->has('idpentityid')) {
++            $idpEntityId = $request->query->get('idpentityid');
++        } else {
+             throw new Error\BadRequest('Missing idpentityid to discovery service response handler');
+         }
+-        $idpEntityId = $request->query->get('idpentityid');
+ 
+         $state = $this->authState::loadState($authId, 'saml:sp:sso');
+ 

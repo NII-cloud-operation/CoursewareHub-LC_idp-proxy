@@ -1,6 +1,6 @@
 server {
   listen 443 ssl;
-  server_name nbhub.ecloud.nii.ac.jp;
+  server_name {{ env("AUTH_FQDN") }};
   root /var/www;
   index index.php index.html index.htm;
 
@@ -24,7 +24,7 @@ server {
   }
 
   location /simplesaml {
-    alias /var/www/simplesamlphp/www;
+    alias /var/www/simplesamlphp/public;
 
     location ~ ^(?<prefix>/simplesaml)(?<phpfile>.+?\.php)(?<pathinfo>/.*)?$ {
       fastcgi_pass unix:/var/run/php-fpm.sock;
