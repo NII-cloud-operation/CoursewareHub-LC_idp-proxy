@@ -1,2 +1,2 @@
-@reboot /usr/bin/sleep 10 && /usr/bin/curl --silent --insecure "https://localhost/simplesaml/module.php/cron/cron.php?key={{ env("CRON_SECRET") }}&tag=daily"
-0 0 * * * /usr/bin/curl --silent --insecure "https://localhost/simplesaml/module.php/cron/cron.php?key={{ env("CRON_SECRET") }}&tag=daily"
+@reboot /usr/bin/sleep 10 && /usr/bin/curl --silent --insecure "https://localhost/simplesaml/module.php/cron/run/daily/{{ env("CRON_SECRET") }}"
+0 0 * * * /usr/bin/curl --silent --insecure "https://localhost/simplesaml/module.php/cron/run/daily/{{ env("CRON_SECRET") }}"

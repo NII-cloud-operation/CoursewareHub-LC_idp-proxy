@@ -1,33 +1,4 @@
-<?php
-
-if (!array_key_exists('header', $this->data)) {
-    $this->data['header'] = 'selectidp';
-}
-$this->data['header'] = $this->t($this->data['header']);
-$this->data['autofocus'] = 'dropdownlist';
-$this->includeAtTemplateBase('includes/header.php');
-
-$translator = $this->getTranslator();
-foreach ($this->data['idplist'] as $idpentry) {
-    if (!empty($idpentry['name'])) {
-        $translator->includeInlineTranslation(
-            'idpname_'.$idpentry['entityid'],
-            $idpentry['name']
-        );
-    } elseif (!empty($idpentry['OrganizationDisplayName'])) {
-        $translator->includeInlineTranslation(
-            'idpname_'.$idpentry['entityid'],
-            $idpentry['OrganizationDisplayName']
-        );
-    }
-    if (!empty($idpentry['description'])) {
-        $translator->includeInlineTranslation('idpdesc_'.$idpentry['entityid'], $idpentry['description']);
-    }
-}
-?>
-
-<!-- EMBEDDED-WAYF-START -->
-<script type="text/javascript"><!--
+<!--
 // To use this JavaScript, please access:
 // https://ds.gakunin.nii.ac.jp/WAYF/embedded-wayf.js/snippet.html
 // and copy/paste the resulting HTML snippet to an unprotected web page that
@@ -44,7 +15,7 @@ var wayf_URL = "https://{{ env("DS_FQDN", default="ds.gakunin.nii.ac.jp") }}/WAY
 // EntityID of the Service Provider that protects this Resource
 // Examples: "https://econf.switch.ch/shibboleth", "https://dokeos.unige.ch/shibboleth"
 // [Mandatory]
-var wayf_sp_entityID = "<?php echo htmlspecialchars($this->data['entityID']); ?>";
+var wayf_sp_entityID = "https://{{ env("AUTH_FQDN") }}/shibboleth-sp";
 
 // Shibboleth Service Provider handler URL
 // Examples: "https://point.switch.ch/Shibboleth.sso", "https://rr.aai.switch.ch/aaitest/Shibboleth.sso"
@@ -54,7 +25,7 @@ var wayf_sp_handlerURL = "https://{{ env("AUTH_FQDN") }}/simplesaml/module.php/s
 // URL on this resource that the user shall be returned to after authentication
 // Examples: "https://econf.switch.ch/aai/home", "https://olat.uzh.ch/my/courses"
 // [Mandatory]
-var wayf_return_url = "<?php echo htmlspecialchars($this->data['return']); ?>";
+var wayf_return_url = "{% raw %}{{ return }}{% endraw %}";
 
 
 //////////////////// RECOMMENDED SETTINGS ////////////////////
@@ -285,62 +256,4 @@ var wayf_additional_idps = [
 // Use these CSS IDs carefully and at own risk because future updates could
 // interfere with the rules you created and the IDs may change without notice!
 
-
 //-->
-</script>
-
-<script type="text/javascript" charset="UTF-8"><!--
-var embedded_wayf_URL = "https://{{ env("DS_FQDN", default="ds.gakunin.nii.ac.jp") }}/WAYF/embedded-wayf.js";
-document.write('<script type="text/javascript" src="' + embedded_wayf_URL + '?' + (new Date().getTime()) + '"></scr'+'ipt>');
-//-->
-</script>
-
-<noscript>
-  <!--
-  Fallback to Shibboleth DS session initiator for non-JavaScript users
-  You should set the value of the target GET parameter to an URL-encoded
-  absolute URL that points to a Shibboleth protected web page where the user
-  is logged in into your application.
-  -->
-  <!--
-  <p>
-    <strong>Login:</strong> Javascript is not available for your web browser. Therefore, please <a href="/Shibboleth.sso/DS?target=">proceed manually</a>.
-  </p>
-   -->
-    <h2><?php echo $this->data['header']; ?></h2>
-    <p><?php echo $this->t('selectidp_full'); ?></p>
-    <form method="get" action="<?php echo $this->data['urlpattern']; ?>">
-        <input type="hidden" name="entityID" value="<?php echo htmlspecialchars($this->data['entityID']); ?>"/>
-        <input type="hidden" name="return" value="<?php echo htmlspecialchars($this->data['return']); ?>"/>
-        <input type="hidden" name="returnIDParam"
-               value="<?php echo htmlspecialchars($this->data['returnIDParam']); ?>"/>
-        <select id="dropdownlist" name="idpentityid">
-            <?php
-            usort($this->data['idplist'], function($idpentry1, $idpentry2) {
-                return strcasecmp(
-                    $this->t('idpname_'.$idpentry1['entityid']),
-                    $this->t('idpname_'.$idpentry2['entityid'])
-                );
-            });
-
-            foreach ($this->data['idplist'] as $idpentry) {
-                echo '<option value="'.htmlspecialchars($idpentry['entityid']).'"';
-                if (isset($this->data['preferredidp']) && $idpentry['entityid'] == $this->data['preferredidp']) {
-                    echo ' selected="selected"';
-                }
-                echo '>'.htmlspecialchars($this->t('idpname_'.$idpentry['entityid'])).'</option>';
-            }
-            ?>
-        </select>
-        <button class="btn" type="submit"><?php echo $this->t('select'); ?></button>
-        <?php
-        if ($this->data['rememberenabled']) {
-            echo('<br/><input type="checkbox" name="remember" value="1" />'.$this->t('remember'));
-        }
-        ?>
-    </form>
-</noscript>
-
-<!-- EMBEDDED-WAYF-END -->
-
-<?php $this->includeAtTemplateBase('includes/footer.php');

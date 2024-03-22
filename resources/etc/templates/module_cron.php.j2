@@ -3,11 +3,9 @@
  * Configuration for the Cron module.
  */
 
-$config = array (
-
+$config = [
         'key' => '{{ env("CRON_SECRET") }}',
-        'allowed_tags' => array('daily', 'hourly', 'frequent'),
-        'debug_message' => TRUE,
-        'sendemail' => FALSE,
-
-);
+        'allowed_tags' => ['daily', 'hourly', 'frequent'],
+        'debug_message' => true,
+        'sendemail' => false,
+];
