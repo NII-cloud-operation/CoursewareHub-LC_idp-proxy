@@ -17,6 +17,17 @@ $config = [
             'outputDir' => 'metadata/gakunin-metadata/',
             'outputFormat' => 'flatfile',
             'expireAfter' => 60*60*24*4
-        ]
+        ],
+        'orthros-metadata' => [
+            'cron' => ['daily'],
+            'sources' => [
+                [
+                    'src' => 'https://core-stg.orthros.gakunin.nii.ac.jp/metadata/orthrosstg-idp-metadata.xml',
+                ]
+            ],
+            'outputDir' => 'metadata/orthros-metadata/',
+            'outputFormat' => 'flatfile',
+            'expireAfter' => 60*60*24*4
+        ],
     ]
 ];
