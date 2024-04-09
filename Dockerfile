@@ -61,7 +61,6 @@ RUN set -x \
     && mkdir -p /var/www/simplesamlphp/metadata/xml \
     && mkdir -p /var/www/simplesamlphp/metadata/gakunin-metadata \
                 /var/www/simplesamlphp/metadata/attributeauthority-remote \
-                /var/www/simplesamlphp/metadata/open-idp-metadata \
     && chown -R nginx:nginx /var/www/simplesamlphp
 COPY resources/simplesamlphp/bin/add_auth_proxy_metadata.php /var/www/simplesamlphp/bin
 COPY resources/simplesamlphp/bin/remove_auth_proxy_metadata.php /var/www/simplesamlphp/bin

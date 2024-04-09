@@ -201,9 +201,6 @@ var wayf_sp_samlDSURL = wayf_sp_handlerURL;
 // [Optional, commented out by default]
 {% set enable_test_federation = env("ENABLE_TEST_FEDERATION", "no") %}
 var wayf_additional_idps = [
-      {name:"OpenIdP",
-      entityID:"https://openidp.nii.ac.jp/idp/shibboleth",
-      SAML1SSOurl:"https://openidp.nii.ac.jp/idp/profile/Shibboleth/SSO"},
       {% if enable_test_federation=="1" or enable_test_federation=="yes" %}
       {name:"Orthros",
       entityID:"https://core-stg.orthros.gakunin.nii.ac.jp/idp"},

@@ -39,17 +39,6 @@ $config = [
             'outputDir' => 'metadata/orthros-metadata/',
             'outputFormat' => 'flatfile',
             'expireAfter' => 60*60*24*4
-        ],
-        'open-idp-metadata' => [
-            'cron' => ['daily'],
-            'sources' => [
-                [
-                    'src' => 'https://openidp.nii.ac.jp/idp/shibboleth',
-                ]
-            ],
-            'outputDir' => 'metadata/open-idp-metadata/',
-            'outputFormat' => 'flatfile',
-            'expireAfter' => 60*60*24*4
         ]
     ]
 );
