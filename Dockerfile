@@ -87,4 +87,4 @@ ENV CERT_DIR=/etc/cert
 # supervisord
 COPY resources/supervisord.conf /etc/
 
-CMD /start.sh
+CMD ["/start.sh"]
