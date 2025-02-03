@@ -1,6 +1,6 @@
 FROM rockylinux:9
 
-ARG SIMPLESAMLPHP_VERSION="2.1.4"
+ARG SIMPLESAMLPHP_VERSION="2.3.5"
 ARG ATTRIBUTE_AGGREGATOR_URL="https://github.com/NII-cloud-operation/simplesamlphp-module-attributeaggregator"
 ARG ATTRIBUTE_AGGREGATOR_BRANCH="dev-2.x-gakunin-cloud-gateway"
 
