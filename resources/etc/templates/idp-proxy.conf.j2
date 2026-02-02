@@ -1,4 +1,17 @@
 server {
+  listen 80;
+  server_name {{ env("AUTH_FQDN") }};
+  root /var/www;
+
+  location /.well-known/acme-challenge/ {
+  }
+
+  location / {
+      return 301 https://$host$request_uri;
+  }
+}
+
+server {
   listen 443 ssl;
   server_name {{ env("AUTH_FQDN") }};
   root /var/www;
@@ -6,8 +19,8 @@ server {
 
   client_max_body_size 10M;
 
-  ssl_certificate "/etc/pki/nginx/idp-proxy.chained.cer";
-  ssl_certificate_key "/etc/pki/nginx/private/idp-proxy.key";
+  ssl_certificate "/etc/pki/nginx/server.cer";
+  ssl_certificate_key "/etc/pki/nginx/private/server.key";
   ssl_protocols TLSv1.2;
 
   location / {

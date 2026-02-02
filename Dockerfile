@@ -14,7 +14,7 @@ RUN set -x \
     && systemctl enable crond \
     && dnf -y install yum-utils \
     # Install nginx and php
-    && dnf -y install --enablerepo=epel nginx python3 python3-pip \
+    && dnf -y install --enablerepo=epel nginx python3.11 python3.11-pip \
     && systemctl enable nginx \
     && dnf -y install https://rpms.remirepo.net/enterprise/remi-release-9.rpm \
     && rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-remi.el9 \
@@ -70,19 +70,24 @@ COPY resources/simplesamlphp/templates/selectidp-dropdown.twig /var/www/simplesa
 COPY resources/simplesamlphp/templates/selectidp-embedded-wayf-start.twig /var/www/simplesamlphp/templates/includes
 COPY resources/simplesamlphp/templates/selectidp-embedded-wayf-end.twig /var/www/simplesamlphp/templates/includes
 COPY resources/saml/www/sp/discoresp.php /var/www/simplesamlphp/modules/saml/www/sp/discoresp.php
-COPY resources/simplesamlphp/bin/add_auth_proxy.sh /usr/local/sbin/
-COPY bin/start.sh /start.sh
-RUN chmod +x /start.sh \
-             /usr/local/sbin/add_auth_proxy.sh
+COPY --chmod=755 resources/simplesamlphp/bin/add_auth_proxy.sh /usr/local/sbin/
+COPY --chmod=755 resources/scripts/start.sh /start.sh
 
-# Install j2li
-RUN pip3 install --no-cache-dir j2cli
+# Install j2cli
+RUN pip3.11 install --no-cache-dir j2cli
+
+# Install certbot
+RUN pip3.11 install --no-cache-dir certbot
+COPY --chmod=755 resources/scripts/acme-init.sh /acme-init.sh
+COPY --chmod=755 resources/scripts/acme-renew.sh /acme-renew.sh
+COPY --chmod=755 resources/scripts/reload-nginx /reload-nginx
 
 # Install config template files
 COPY resources/etc/templates /etc/templates
 
 VOLUME /etc/cert
 ENV CERT_DIR=/etc/cert
+ENV CERTBOT_DIR=/etc/letsencrypt
 
 # supervisord
 COPY resources/supervisord.conf /etc/
