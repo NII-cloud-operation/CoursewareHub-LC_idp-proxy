@@ -4,7 +4,7 @@
  */
 
 $config = [
-        'key' => '{{ env("CRON_SECRET") }}',
+        'key' => '{{ environ("CRON_SECRET") }}',
         'allowed_tags' => ['daily', 'hourly', 'frequent'],
         'debug_message' => true,
         'sendemail' => false,

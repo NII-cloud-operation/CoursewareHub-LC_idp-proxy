@@ -195,7 +195,7 @@ $config = [
      * metadata listing and diagnostics pages.
      * You can also put a hash here; run "bin/pwgen.php" to generate one.
      */
-    'auth.adminpassword' => '{{ env("SIMPLESAMLPHP_ADMIN_PASSWORD", "axsh0720") }}',
+    'auth.adminpassword' => '{{ environ("SIMPLESAMLPHP_ADMIN_PASSWORD") }}',
 
     /*
      * Set this option to true if you want to require administrator password to access the metadata.
@@ -283,7 +283,7 @@ $config = [
     ],
 
     'disco.headers.security' => [
-        'Content-Security-Policy' => "default-src 'none'; frame-ancestors 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://{{ env("DS_FQDN", default="ds.gakunin.nii.ac.jp" )}}; style-src 'self' 'unsafe-inline' https://{{ env("DS_FQDN", default="ds.gakunin.nii.ac.jp") }}; font-src 'self'; connect-src 'self'; img-src 'self' data: https:; base-uri 'none'",
+        'Content-Security-Policy' => "default-src 'none'; frame-ancestors 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://{{ environ("DS_FQDN") | default("ds.gakunin.nii.ac.jp", true) }}; style-src 'self' 'unsafe-inline' https://{{ environ("DS_FQDN") | default("ds.gakunin.nii.ac.jp", true) }}; font-src 'self'; connect-src 'self'; img-src 'self' data: https:; base-uri 'none'",
     ],
 
     /************************
@@ -366,7 +366,7 @@ $config = [
      * must exist and be writable for SimpleSAMLphp. If set to something else, set
      * loggingdir above to 'null'.
      */
-    'logging.level' => SimpleSAML\Logger::{{ env("SIMPLESAMLPHP_LOGLEVEL", "DEBUG") }},
+    'logging.level' => SimpleSAML\Logger::{{ environ("SIMPLESAMLPHP_LOGLEVEL") | default("DEBUG", true) }},
     'logging.handler' => 'file',
 
     /*
@@ -1049,11 +1049,11 @@ $config = [
         ],
         */
 
-	{% set disable_cloud_gateway = env("DISABLE_CLOUD_GATEWAY", "no") %}
+	{% set disable_cloud_gateway = environ("DISABLE_CLOUD_GATEWAY") | default("no", true) %}
 	{% if disable_cloud_gateway!="1" and disable_cloud_gateway!="yes" %}
         59 => array(
             'class' => 'attributeaggregator:attributeaggregator',
-            'entityId' => 'https://{{ env("CG_FQDN", default="cg.gakunin.jp") }}/idp/shibboleth',
+            'entityId' => 'https://{{ environ("CG_FQDN") | default("cg.gakunin.jp", true) }}/idp/shibboleth',
 
             /**
              * The subject of the attribute query. Default: urn:oid:1.3.6.1.4.1.5923.1.1.1.6 (eduPersonPrincipalName)
@@ -1100,7 +1100,7 @@ $config = [
 
         69 => array(
             'class' => 'attributeaggregator:attributeaggregator',
-            'entityId' => 'https://{{ env("CG_FQDN", default="cg.gakunin.jp") }}/idp/shibboleth',
+            'entityId' => 'https://{{ environ("CG_FQDN") | default("cg.gakunin.jp", true) }}/idp/shibboleth',
 
             /**
              * The subject of the attribute query. Default: urn:oid:1.3.6.1.4.1.5923.1.1.1.6 (eduPersonPrincipalName)
@@ -1262,8 +1262,8 @@ $config = [
      * ],
      */
 
-    {% set cgidp_localfile_metadata = env("CGIDP_LOCALFILE_METADATA", "no") %}
-    {% set enable_test_federation = env("ENABLE_TEST_FEDERATION", "no") %}
+    {% set cgidp_localfile_metadata = environ("CGIDP_LOCALFILE_METADATA") | default("no", true) %}
+    {% set enable_test_federation = environ("ENABLE_TEST_FEDERATION") | default("no", true) %}
 
     'metadata.sources' => [
         ['type' => 'flatfile'],

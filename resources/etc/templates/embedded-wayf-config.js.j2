@@ -10,17 +10,17 @@
 // URL of the WAYF to use
 // Examples: "https://wayf.switch.ch/SWITCHaai/WAYF", "https://wayf-test.switch.ch/aaitest/WAYF";
 // [Mandatory]
-var wayf_URL = "https://{{ env("DS_FQDN", default="ds.gakunin.nii.ac.jp") }}/WAYF";
+var wayf_URL = "https://{{ environ("DS_FQDN") | default("ds.gakunin.nii.ac.jp", true) }}/WAYF";
 
 // EntityID of the Service Provider that protects this Resource
 // Examples: "https://econf.switch.ch/shibboleth", "https://dokeos.unige.ch/shibboleth"
 // [Mandatory]
-var wayf_sp_entityID = "https://{{ env("AUTH_FQDN") }}/shibboleth-sp";
+var wayf_sp_entityID = "https://{{ environ("AUTH_FQDN") }}/shibboleth-sp";
 
 // Shibboleth Service Provider handler URL
 // Examples: "https://point.switch.ch/Shibboleth.sso", "https://rr.aai.switch.ch/aaitest/Shibboleth.sso"
 // [Mandatory, if wayf_use_discovery_service = false]
-var wayf_sp_handlerURL = "https://{{ env("AUTH_FQDN") }}/simplesaml/module.php/saml/sp/discoresp.php";
+var wayf_sp_handlerURL = "https://{{ environ("AUTH_FQDN") }}/simplesaml/module.php/saml/sp/discoresp.php";
 
 // URL on this resource that the user shall be returned to after authentication
 // Examples: "https://econf.switch.ch/aai/home", "https://olat.uzh.ch/my/courses"
@@ -199,7 +199,7 @@ var wayf_sp_samlDSURL = wayf_sp_handlerURL;
 // that shall be added to the drop-down list
 // The IdPs will be displayed in the sequence they are defined
 // [Optional, commented out by default]
-{% set enable_test_federation = env("ENABLE_TEST_FEDERATION", "no") %}
+{% set enable_test_federation = environ("ENABLE_TEST_FEDERATION") | default("no", true) %}
 var wayf_additional_idps = [
       {% if enable_test_federation=="1" or enable_test_federation=="yes" %}
       {name:"Orthros",
