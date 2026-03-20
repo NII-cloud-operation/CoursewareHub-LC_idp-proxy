@@ -3,8 +3,13 @@
 set -xe
 
 # Setup the keys for nginx
-cp -p $CERT_DIR/idp-proxy.chained.cer /etc/pki/nginx/
-cp -p $CERT_DIR/idp-proxy.key /etc/pki/nginx/private/
+if [[ -e $CERT_DIR/server.cer ]] && [[ -e $CERT_DIR/server.key ]]; then
+    ln -s -f $CERT_DIR/server.cer /etc/pki/nginx/server.cer
+    ln -s -f $CERT_DIR/server.key /etc/pki/nginx/private/server.key
+else
+    export ACME_ENABLED=1
+    /acme-init.sh
+fi
 
 # Setup the keys for simplesamlphp
 cp -p $CERT_DIR/idp-proxy.cer /var/www/simplesamlphp/cert/
@@ -29,4 +34,4 @@ else
    j2 ${TEMPLATE_DIR}/module_metarefresh.php.j2 -o /var/www/simplesamlphp/config/module_metarefresh.php
 fi
 
-/usr/bin/supervisord -n -c /etc/supervisord.conf
+exec /usr/bin/supervisord -n -c /etc/supervisord.conf
