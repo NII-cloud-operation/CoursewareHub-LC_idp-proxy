@@ -14,7 +14,7 @@ RUN set -x \
     && systemctl enable crond \
     && dnf -y install yum-utils \
     # Install nginx and php
-    && dnf -y install --enablerepo=epel nginx python3.11 python3.11-pip \
+    && dnf -y install --enablerepo=epel nginx python3.12 python3.12-pip \
     && systemctl enable nginx \
     && dnf -y install https://rpms.remirepo.net/enterprise/remi-release-9.rpm \
     && rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-remi.el9 \
@@ -73,11 +73,11 @@ COPY resources/saml/www/sp/discoresp.php /var/www/simplesamlphp/modules/saml/www
 COPY --chmod=755 resources/simplesamlphp/bin/add_auth_proxy.sh /usr/local/sbin/
 COPY --chmod=755 resources/scripts/start.sh /start.sh
 
-# Install j2cli
-RUN pip3.11 install --no-cache-dir j2cli
+# Install jinja2-cli
+RUN pip3.12 install --no-cache-dir jinja2-cli
 
 # Install certbot
-RUN pip3.11 install --no-cache-dir certbot
+RUN pip3.12 install --no-cache-dir certbot
 COPY --chmod=755 resources/scripts/acme-init.sh /acme-init.sh
 COPY --chmod=755 resources/scripts/acme-renew.sh /acme-renew.sh
 COPY --chmod=755 resources/scripts/reload-nginx /reload-nginx
@@ -87,7 +87,6 @@ COPY resources/etc/templates /etc/templates
 
 VOLUME /etc/cert
 ENV CERT_DIR=/etc/cert
-ENV CERTBOT_DIR=/etc/letsencrypt
 
 # supervisord
 COPY resources/supervisord.conf /etc/
