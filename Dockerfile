@@ -1,6 +1,6 @@
 FROM rockylinux:9
 
-ARG SIMPLESAMLPHP_VERSION="2.3.7"
+ARG SIMPLESAMLPHP_VERSION="2.4.4"
 ARG ATTRIBUTE_AGGREGATOR_URL="https://github.com/NII-cloud-operation/simplesamlphp-module-attributeaggregator"
 ARG ATTRIBUTE_AGGREGATOR_BRANCH="dev-2.x-gakunin-cloud-gateway"
 
@@ -19,7 +19,7 @@ RUN set -x \
     && dnf -y install https://rpms.remirepo.net/enterprise/remi-release-9.rpm \
     && rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-remi.el9 \
     && dnf -y module reset php \
-    && dnf -y module install php:remi-8.3 \
+    && dnf -y module install php:remi-8.4 \
     && dnf -y install --enablerepo=remi php php-fpm php-xml php-gmp php-soap php-ldap \
     && php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
     && php -r "if (hash_file('sha384', 'composer-setup.php') === '$(curl -q https://composer.github.io/installer.sig)') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;" \
