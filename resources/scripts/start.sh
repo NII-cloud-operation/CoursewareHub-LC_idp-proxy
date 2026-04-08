@@ -12,9 +12,17 @@ else
 fi
 
 # Setup the keys for simplesamlphp
-cp -p $CERT_DIR/idp-proxy.cer /var/www/simplesamlphp/cert/
-cp -p $CERT_DIR/idp-proxy.key /var/www/simplesamlphp/cert/
-cp -p $CERT_DIR/gakunin-signer.cer /var/www/simplesamlphp/cert/
+cp -p $CERT_DIR/idp-proxy.cer $SSP_CERT_DIR
+cp -p $CERT_DIR/idp-proxy.key $SSP_CERT_DIR
+CERT_FILES="$GAKUNIN_SIGNER_FILENAME \
+            $GAKUNINTEST_SIGNER_FILENAME \
+            $ORTHROS_SIGNER_FILENAME \
+            $ORTHROSSTG_SIGNER_FILENAME"
+for cert_file in $CERT_FILES; do
+    if [[ -e $CERT_DIR/$cert_file ]]; then
+        cp -p $CERT_DIR/$cert_file $SSP_CERT_DIR/
+    fi
+done
 
 # Setup config files
 TEMPLATE_DIR=/etc/templates
