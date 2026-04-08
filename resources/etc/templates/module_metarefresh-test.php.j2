@@ -8,9 +8,9 @@ $config = [
                 [
                     'src' => 'https://metadata.gakunin.nii.ac.jp/gakunin-test-metadata.xml',
                     'certificates' => [
-                        'gakunin-signer.cer'
+                        '{{ environ("GAKUNINTEST_SIGNER_FILENAME") }}'
                     ],
-                    'validateFingerprint' => 'FA:11:11:5B:EC:13:4D:55:85:AF:60:32:E1:6C:01:01:EF:9C:A0:6B:17:8C:8B:9C:7F:2B:69:41:EB:68:30:1E',
+                    'validateFingerprint' => '{{ environ("GAKUNINTEST_SIGNER_SHA256") }}',
                     'validateFingerprintAlgorithm' => 'XMLSecurityDSig::SHA256'
                 ]
             ],
@@ -23,6 +23,11 @@ $config = [
             'sources' => [
                 [
                     'src' => 'https://core-stg.orthros.gakunin.nii.ac.jp/metadata/orthrosstg-idp-metadata.xml',
+                    'certificates' => [
+                        '{{ environ("ORTHROSSTG_SIGNER_FILENAME") }}'
+                    ],
+                    'validateFingerprint' => '{{ environ("ORTHROSSTG_SIGNER_SHA256") }}',
+                    'validateFingerprintAlgorithm' => 'XMLSecurityDSig::SHA256'
                 ]
             ],
             'outputDir' => 'metadata/orthros-metadata/',
